@@ -24,14 +24,16 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Loyiha karkasini sozlash (Android)
+      - name: Android karkasini tiklash
         run: |
-          flutter create . --org uz.osonkadastr --platforms android
+          mkdir -p android
+          flutter create . --org uz.osonkadastr --platforms android --project-name oson_kadastr
 
-      - name: Yangi ilova belgisini (icon) yaratish
-        run: |
-          flutter pub get
-          dart run flutter_launcher_icons
+      - name: Paketlarni yuklash
+        run: flutter pub get
+
+      - name: Logotipni o'rnatish
+        run: dart run flutter_launcher_icons
 
       - name: APK yig'ish
         run: flutter build apk --release
