@@ -21,6 +21,7 @@ class OsonKadastrApp extends StatelessWidget {
   }
 }
 
+// ---------------- MODEL ----------------
 class RequiredDocument {
   final String simpleName;
   final String officialName;
@@ -61,6 +62,7 @@ class KadastrService {
   });
 }
 
+// ---------------- DATA ----------------
 final List<KadastrService> kadastrServices = [
   KadastrService(
     id: '1',
@@ -142,6 +144,7 @@ final List<KadastrService> kadastrServices = [
   ),
 ];
 
+// ---------------- BOSH SAHIFA ----------------
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -163,7 +166,59 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: const Color(0xFFF4F6F9),
       appBar: AppBar(
         backgroundColor: const Color(0xFF0D47A1),
+        iconTheme: const IconThemeData(color: Colors.white),
         title: const Text('Oson Kadastr', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.info_outline, color: Colors.white),
+            tooltip: 'Dastur haqida va Aloqa',
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()));
+            },
+          )
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const UserAccountsDrawerHeader(
+              decoration: BoxDecoration(color: Color(0xFF0D47A1)),
+              accountName: Text('Oson Kadastr', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+              accountEmail: Text('Muallif: Muxriddin Elbegiyev'),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Icon(Icons.home_work, color: Color(0xFF0D47A1), size: 40),
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.home, color: Color(0xFF0D47A1)),
+              title: const Text('Asosiy sahifa'),
+              onTap: () => Navigator.pop(context),
+            ),
+            ListTile(
+              leading: const Icon(Icons.phone_in_talk, color: Colors.green),
+              title: const Text('Kadastr ishonch telefoni: 1197'),
+              subtitle: const Text('Davlat Kadastr Palatasi call-markazi'),
+              onTap: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Davlat Kadastr Palatasi: 1197')),
+                );
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.person, color: Colors.blueAccent),
+              title: const Text('Dastur muallifi bilan aloqa'),
+              subtitle: const Text('+998 33 911 22 22'),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()));
+              },
+            ),
+          ],
+        ),
       ),
       body: Column(
         children: [
@@ -248,6 +303,121 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+// ---------------- DASTUR VA MUALLIF BILAN ALOQA EKRANI ----------------
+class AboutScreen extends StatelessWidget {
+  const AboutScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFFF4F6F9),
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF0D47A1),
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text('Dastur haqida va Aloqa', style: TextStyle(color: Colors.white, fontSize: 17)),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          Card(
+            elevation: 2,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                children: [
+                  const CircleAvatar(
+                    radius: 42,
+                    backgroundColor: Color(0xFF0D47A1),
+                    child: Icon(Icons.person, size: 48, color: Colors.white),
+                  ),
+                  const SizedBox(height: 14),
+                  const Text(
+                    'Muxriddin Elbegiyev',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+                  ),
+                  const SizedBox(height: 4),
+                  const Text(
+                    'Loyiha muallifi va ishlab chiquvchi',
+                    style: TextStyle(fontSize: 13, color: Colors.grey),
+                  ),
+                  const Divider(height: 30),
+
+                  // TELEFON
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const CircleAvatar(
+                      backgroundColor: Color(0xFFE8F5E9),
+                      child: Icon(Icons.phone, color: Colors.green),
+                    ),
+                    title: const Text('Aloqa uchun telefon raqam', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    subtitle: const Text(
+                      '+998 33 911 22 22',
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.copy, size: 18, color: Colors.grey),
+                      tooltip: 'Nusxalash',
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Raqam nusxalandi: +998 33 911 22 22')),
+                        );
+                      },
+                    ),
+                  ),
+
+                  // TELEGRAM
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    leading: const CircleAvatar(
+                      backgroundColor: Color(0xFFE1F5FE),
+                      child: Icon(Icons.send, color: Colors.lightBlue),
+                    ),
+                    title: const Text('Telegram aloqa', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    subtitle: const Text(
+                      '+998 33 911 22 22',
+                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // MAQSAD
+          Card(
+            elevation: 1.5,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            child: const Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.flag_outlined, color: Color(0xFF0D47A1)),
+                      SizedBox(width: 8),
+                      Text('Loyihaning maqsadi', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                    ],
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Ushbu mobil ilova aholining (ayniqsa, chekka hududlardagi fuqarolarning) kadastr sohasidagi huquqiy savodxonligini oshirish, firibgarlik va noqonuniy talablardan himoya qilish hamda davlat xizmatlaridan ortiqcha xarajatsiz, oson foydalanishlariga yordam berish maqsadida yaratilgan.',
+                    style: TextStyle(fontSize: 13, height: 1.4, color: Colors.black87),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------- TAFSILOTLAR EKRANI ----------------
 class DetailScreen extends StatelessWidget {
   final KadastrService service;
   const DetailScreen({super.key, required this.service});
@@ -345,6 +515,7 @@ class DetailScreen extends StatelessWidget {
   }
 }
 
+// ---------------- CHECKLIST EKRANI ----------------
 class CheckScreen extends StatefulWidget {
   final KadastrService service;
   const CheckScreen({super.key, required this.service});
