@@ -62,84 +62,196 @@ class KadastrService {
   });
 }
 
-// ---------------- DATA ----------------
+// ---------------- BARCHA ASOSIY KADASTR XIZMATLARI ----------------
 final List<KadastrService> kadastrServices = [
   KadastrService(
     id: '1',
-    titleSimple: 'Uyga yangi kadastr daftarchasi olish',
+    titleSimple: 'Uyga yangi kadastr pasportini shakllantirish',
     titleOfficial: 'Ko‘chmas mulk obyektiga kadastr pasportini shakllantirish',
     category: 'Uy-joy',
-    purpose: 'Uyingizni rasman o‘lchab, sizga mulkdorlik elektron guvohnomasi va chizmasini berish uchun kerak.',
-    duration: '5 dan 10 ish kunigacha',
-    cost: 'Maydon hajmiga qarab davlat stavkasi bo‘yicha to‘lanadi.',
-    warningTip: 'Hech qachon ko‘chada yurgan "o‘rtakash"ga pul bermang! To‘lov faqat davlat SMS-kvitansiyasi orqali to‘lanadi.',
+    purpose: 'Ko‘chmas mulk obyekti (uy, kvartira, bino)ning texnik ko‘rsatkichlarini va elektron chizmasini tayyorlash.',
+    duration: '5 dan 10 ish kunigacha (maydoni va murakkabligiga qarab)',
+    cost: 'Obyekt maydoni va turiga qarab belgilangan davlat boji asosida (SMS-kvitansiya orqali)',
+    warningTip: 'Hech kimga qo‘ldan naqd pul bermang! To‘lov faqat Davlat xizmatlari markazi yoki Click/Payme/Uzum orqali invoys asosida qilinadi.',
     docs: [
       RequiredDocument(
-        simpleName: 'Uy sizniki ekanini bildiruvchi asosiy qog‘oz',
+        simpleName: 'Mulkka egalik huquqini tasdiqlovchi hujjat',
         officialName: 'Huquq belgilovchi hujjat',
-        whereToGet: 'Tuman davlat arxividan, tuman hokimligidan yoki notariusdan olinadi.',
-        explanation: 'Hokim qarori, notarial shartnoma, meros hujjati yoki order.',
+        whereToGet: 'Notarius, tuman hokimligi yoki davlat arxividan',
+        explanation: 'Oldi-sotdi shartnomasi, meros guvohnomasi, order yoki tuman hokimi qarori.',
       ),
       RequiredDocument(
-        simpleName: 'O‘zingizning pasportingiz yoki ID-kartangiz',
+        simpleName: 'Ariza beruvchining pasporti yoki ID-kartasi',
         officialName: 'Shaxsni tasdiqlovchi hujjat (JShSHIR)',
-        whereToGet: 'Yoningizda bo‘lishi kifoya.',
-        explanation: '14 xonali JShSHIR raqamingiz tizimga kiritiladi.',
+        whereToGet: 'Yoningizda bo‘lishi kifoya',
+        explanation: '14 xonali shaxsiy identifikatsiya raqami orqali ariza kiritiladi.',
       ),
     ],
     illegalDemands: [
-      'Mahalla qo‘mitasidan maʼlumotnoma (spravka)',
-      'Qo‘shnilarning imzo yig‘ilgan xati',
-      'Kommunal to‘lovlardan qarz yo‘qligi haqida qog‘oz',
+      'Mahalladan maʼlumotnoma (spravka)',
+      'Qo‘shnilardan yozma rozilik xati',
+      'Kommunal to‘lovlardan qarz yo‘qligi to‘g‘risida maʼlumotnoma',
     ],
   ),
   KadastrService(
     id: '2',
-    titleSimple: 'Uyni rasman o‘z nomimga muhrlash',
-    titleOfficial: 'Ko‘chmas mulkka bo‘lgan huquqni davlat ro‘yxatidan o‘tkazish',
+    titleSimple: 'Mulk huquqini davlat ro‘yxatidan o‘tkazish',
+    titleOfficial: 'Ko‘chmas mulkka bo‘lgan huquqlarni davlat ro‘yxatidan o‘tkazish',
     category: 'Uy-joy',
-    purpose: 'Uyni sotib olgandan yoki merosdan so‘ng bazada yangi rasmiy xo‘jayin kimligini ko‘rsatish.',
+    purpose: 'Ko‘chmas mulkka bo‘lgan egalik huquqini Yagona davlat reyestrida rasman tasdiqlash va ro‘yxatdan o‘tkazish.',
     duration: '2 ish kuni',
     cost: 'BHMning 1 dan 1.25 baravarigacha',
-    warningTip: 'Agar uyni notariusda qilib, ro‘yxatdan o‘tkazmasangiz, qonuniy to‘liq xo‘jayin bo‘lmaysiz.',
+    warningTip: 'Agar notarial bitimdan so‘ng mulk ro‘yxatdan o‘tkazilmasa, huquqiy jihatdan to‘liq mulkdor hisoblanmaysiz.',
     docs: [
       RequiredDocument(
-        simpleName: 'Notarius tasdiqlagan shartnoma yoki meros hujjati',
-        officialName: 'Oldi-sotdi, hadya yoki meros hujjati',
-        whereToGet: 'Notarial idoradan',
-        explanation: 'QR-kodli notarius tasdiqlagan rasmiy qog‘oz.',
+        simpleName: 'Huquq belgilovchi notarial yoki sud hujjati',
+        officialName: 'Bitim yoki sud qarori',
+        whereToGet: 'Notarial idoradan yoki suddan',
+        explanation: 'Shartnoma, merosga bo‘lgan guvohnoma yoki sudning qonuniy kuchga kirgan qarori.',
       ),
       RequiredDocument(
-        simpleName: 'Mavjud eski kadastr hujjati',
-        officialName: 'Kadastr yig‘majildi',
-        whereToGet: 'Uyning oldingi egasidan olinadi',
-        explanation: 'Uyning chizmasi va xona o‘lchamlari.',
+        simpleName: 'Obyektning kadastr yig‘majildi (pasporti)',
+        officialName: 'Kadastr pasporti',
+        whereToGet: 'Avvalgi egasidan yoki kadastr tizimidan',
+        explanation: 'Mulkning elektron chizmasi va xususiyatlari jamlangan hujjat.',
       ),
     ],
     illegalDemands: [
-      'Tuman arxividan qo‘shimcha tasdiqnoma so‘rash',
-      'Barcha oila aʼzolarining shaxsan borishi',
+      'Notarius tasdiqlagan hujjatni qayta tasdiqlatish',
+      'Arxivdan qo‘shimcha nusxa talab qilish',
     ],
   ),
   KadastrService(
     id: '3',
-    titleSimple: 'Uyda taqiq (Zapret) bor-yo‘qligini bilish',
-    titleOfficial: 'Ko‘chmas mulk bo‘yicha taqiq yo‘qligi to‘g‘risida maʼlumotnoma',
+    titleSimple: 'Ko‘chmas mulk bo‘yicha taqiq (Zapret) bor-yo‘qligini tekshirish',
+    titleOfficial: 'Ko‘chmas mulk bo‘yicha taqiq va xatlovlar to‘g‘risida maʼlumotnoma',
     category: 'Maʼlumotnoma',
-    purpose: 'Oldi-sotdi qilishdan oldin uyga sud, bank yoki MIB taqiq qo‘ymaganini tekshirish.',
-    duration: '1 ish kuni (ko‘pincha bir necha daqiqa)',
-    cost: 'BHMning 10-20% atrofida',
-    warningTip: 'Taqiq chiqqan uyni notarius rasmiylashtirmaydi.',
+    purpose: 'Mulkka sud, MIB, bank yoki notarius tomonidan taqiq qo‘yilmaganligini aniqlash.',
+    duration: '1 ish kuni (ko‘p hollarda real vaqtda avtomatik)',
+    cost: 'BHMning 0.05 baravari (my.gov.uz orqali chegirma bor)',
+    warningTip: 'Taqiq yoki xatlov bor obyektni sotish, hadya qilish yoki garovga qo‘yish qonunan mumkin emas.',
     docs: [
       RequiredDocument(
-        simpleName: 'Uyning kadastr raqami',
-        officialName: 'Ko‘chmas mulk kadastr raqami',
-        whereToGet: 'Kadastr qog‘ozining birinchi betidan',
-        explanation: 'Masalan: 10:01:02:... ko‘rinishidagi unikal raqam.',
+        simpleName: 'Obyektning kadastr raqami',
+        officialName: 'Mulk kadastr raqami',
+        whereToGet: 'Kadastr guvohnomasidan',
+        explanation: '10:.. formatidagi maxsus raqam.',
       ),
     ],
     illegalDemands: [
-      'MIB idorasiga borib muhr bosdirib kelish talabi',
+      'MIB yoki soliq idorasidan qo‘shimcha muhrli maʼlumotnoma talab qilish',
+    ],
+  ),
+  KadastrService(
+    id: '4',
+    titleSimple: 'Mulkning o‘ziga tegishliligi haqida maʼlumotnoma',
+    titleOfficial: 'Fuqaroning nomida ko‘chmas mulk bor/yo‘qligi haqida maʼlumotnoma',
+    category: 'Maʼlumotnoma',
+    purpose: 'Fuqaroning butun O‘zbekiston hududida o‘z nomida turar joyi bor yoki yo‘qligini tasdiqlash (subsidiya, uy-joy navbati uchun kerak bo‘ladi).',
+    duration: 'Avtomatik (1 kun ichida)',
+    cost: 'BHMning 0.05 baravari',
+    warningTip: 'Ko‘pincha davlat subsidiyasi yoki ipoteka olishda talab etiladi.',
+    docs: [
+      RequiredDocument(
+        simpleName: 'Pasport / ID karta maʼlumotlari',
+        officialName: 'Shaxsiy JShSHIR',
+        whereToGet: 'O‘zingizning shaxsingiz',
+        explanation: 'Tizim JShSHIR orqali barcha bazani o‘zi tekshiradi.',
+      ),
+    ],
+    illegalDemands: [
+      'Turar joyi yo‘qligi haqida mahalladan tasdiqnoma so‘rash',
+    ],
+  ),
+  KadastrService(
+    id: '5',
+    titleSimple: 'Uyni (obyektni) ikkiga yoki undan ko‘p qismga bo‘lish',
+    titleOfficial: 'Ko‘chmas mulk obyektini bo‘lish yoki birlashtirish bo‘yicha davlat xizmati',
+    category: 'Uy-joy',
+    purpose: 'Bitta yer uchastkasi yoki uyni ikki mulkdor o‘rtasida mustaqil alohida obyektlarga ajratish.',
+    duration: '10 dan 15 ish kunigacha',
+    cost: 'Davlat boji stavkalari asosida',
+    warningTip: 'Bo‘linayotgan yangi obyektlar alohida kirish yo‘liga va minimal yer meʼyorlariga mos bo‘lishi lozim.',
+    docs: [
+      RequiredDocument(
+        simpleName: 'Mulkdorlarning o‘zaro notarial kelishuvi yoki sud qarori',
+        officialName: 'Taqsimlash bitimi / Sud qarori',
+        whereToGet: 'Notarius yoki sud orqali',
+        explanation: 'Uy qaysi qismdan qanday bo‘linganini ko‘rsatuvchi hujjat.',
+      ),
+      RequiredDocument(
+        simpleName: 'Asl kadastr hujjati',
+        officialName: 'Obyekt kadastr yig‘majildi',
+        whereToGet: 'Uy egasining qo‘lida bo‘ladi',
+        explanation: 'Eski butun holatdagi kadastr.',
+      ),
+    ],
+    illegalDemands: [
+      'Kommunal xizmatlarning yangi hisob raqamlari ochilganini oldindan talab qilish',
+    ],
+  ),
+  KadastrService(
+    id: '6',
+    titleSimple: 'Ipoteka va garov huquqini ro‘yxatdan o‘tkazish',
+    titleOfficial: 'Ko‘chmas mulk ipotekasi va garov shartnomasini ro‘yxatga olish',
+    category: 'Yer uchastkasi',
+    purpose: 'Bankdan kredit olishda uyni garovga qo‘yish yoki kredit yopilgach garovni yechish.',
+    duration: '1 ish kuni',
+    cost: 'BHMning 50% miqdorida',
+    warningTip: 'Kredit to‘liq yopilgach, bankdan darhol xatlovni yechish arizasini topshirtiring.',
+    docs: [
+      RequiredDocument(
+        simpleName: 'Garov yoki ipoteka shartnomasi',
+        officialName: 'Notarial tasdiqlangan ipoteka shartnomasi',
+        whereToGet: 'Bank va notariusdan',
+        explanation: 'Mulk kafolat sifatida olinganini tasdiqlovchi shartnoma.',
+      ),
+    ],
+    illegalDemands: [
+      'Bank vakilining Davlat xizmatlari markaziga shaxsan borishi',
+    ],
+  ),
+  KadastrService(
+    id: '7',
+    titleSimple: 'Tadbirkorlik uchun yer uchastkasini auksiondan olish',
+    titleOfficial: 'Yer uchastkalarini "E-auksion" orqali ijaraga yoki mulk qilib berish',
+    category: 'Yer uchastkasi',
+    purpose: 'Tadbirkorlik va biznes faoliyati uchun bo‘sh turgan yer maydonlarini auksion orqali shaffof xarid qilish.',
+    duration: 'Auksion muddatiga binoan (reglament asosida)',
+    cost: 'Auksiondagi yutuq bahosi bo‘yicha',
+    warningTip: 'Hokimning to‘g‘ridan-to‘g‘ri yer ajratish vakolati yo‘q! Faqat E-auksion orqali olinadi.',
+    docs: [
+      RequiredDocument(
+        simpleName: 'Elektron raqamli imzo (ERI)',
+        officialName: 'ERI kaliti',
+        whereToGet: 'Davlat xizmatlari markazidan yoki E-imzo orqali',
+        explanation: 'Auksionda qatnashish va bayonnomani tasdiqlash uchun kerak.',
+      ),
+    ],
+    illegalDemands: [
+      'Auksion yutug‘idan so‘ng hokim qarorini kutish yoki qo‘shimcha ruxsatnoma olish',
+    ],
+  ),
+  KadastrService(
+    id: '8',
+    titleSimple: 'O‘zboshimchalik bilan egallangan yer va binolarni qonuniylashtirish',
+    titleOfficial: 'O‘zboshimchalik bilan egallangan yer uchastkalari hamda ularda qurilgan binolarga bo‘lgan huquqlarni eʼtirof etish',
+    category: 'Qonuniylashtirish',
+    purpose: 'Yillar davomida hujjatsiz foydalanib kelingan uy-joylar va yer maydonlariga amaldagi amnistiya qonuni asosida huquqni rasmiylashtirish.',
+    duration: 'Bosqichma-bosqich xatlov grafigi asosida',
+    cost: 'Bir martalik belgilangan yig‘im stavkasi bo‘yicha',
+    warningTip: 'Ushbu xizmat bo‘yicha hech qanday vositachilarga pul bermang! Hududlar kadastr organlari tomonidan reja asosida dron va xatlov orqali bosqichma-bosqich ko‘rib chiqiladi.',
+    docs: [
+      RequiredDocument(
+        simpleName: 'Yer yoki binodan uzoq vaqt foydalanilganini bildiruvchi eski dalillar',
+        officialName: 'Elektr, gaz to‘lov daftarlari, eski cheklar yoki soliq to‘lovlari',
+        whereToGet: 'Shaxsiy arxiv / kommunal to‘lov tizimlaridan',
+        explanation: 'Ushbu joyda ko‘p yillardan buyon yashab kelayotganingizni ko‘rsatuvchi to‘lovlar.',
+      ),
+    ],
+    illegalDemands: [
+      'Oldindan noqonuniy "tezlashtirish" to‘lovlarini talab qilish',
+      'Noqonuniy komissiyalar tuzib pul yig‘ish',
     ],
   ),
 ];
@@ -154,7 +266,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _selectedCategory = 'Barchasi';
-  final List<String> _categories = ['Barchasi', 'Uy-joy', 'Maʼlumotnoma'];
+  final List<String> _categories = ['Barchasi', 'Uy-joy', 'Yer uchastkasi', 'Maʼlumotnoma', 'Qonuniylashtirish'];
 
   @override
   Widget build(BuildContext context) {
@@ -193,7 +305,8 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.home, color: Color(0xFF0D47A1)),
-              title: const Text('Asosiy sahifa'),
+              title: const Text('Barcha kadastr xizmatlari'),
+              subtitle: Text('${kadastrServices.length} ta asosiy yo‘nalish'),
               onTap: () => Navigator.pop(context),
             ),
             ListTile(
@@ -275,14 +388,27 @@ class _HomeScreenState extends State<HomeScreen> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(14),
-                    title: Text(item.titleSimple, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    title: Text(item.titleSimple, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const SizedBox(height: 4),
                         Text(item.titleOfficial, style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontStyle: FontStyle.italic)),
                         const SizedBox(height: 6),
-                        Text('Muddat: ${item.duration}', style: const TextStyle(fontSize: 12, color: Colors.blueGrey)),
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: Colors.blue.shade50,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Text(item.category, style: const TextStyle(fontSize: 11, color: Color(0xFF0D47A1), fontWeight: FontWeight.bold)),
+                            ),
+                            const SizedBox(width: 8),
+                            Text('Muddat: ${item.duration}', style: const TextStyle(fontSize: 11, color: Colors.blueGrey)),
+                          ],
+                        ),
                       ],
                     ),
                     trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -355,15 +481,6 @@ class AboutScreen extends StatelessWidget {
                       '+998 33 911 22 22',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
                     ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.copy, size: 18, color: Colors.grey),
-                      tooltip: 'Nusxalash',
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Raqam nusxalandi: +998 33 911 22 22')),
-                        );
-                      },
-                    ),
                   ),
 
                   // TELEGRAM
@@ -404,7 +521,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    'Ushbu mobil ilova aholining (ayniqsa, chekka hududlardagi fuqarolarning) kadastr sohasidagi huquqiy savodxonligini oshirish, firibgarlik va noqonuniy talablardan himoya qilish hamda davlat xizmatlaridan ortiqcha xarajatsiz, oson foydalanishlariga yordam berish maqsadida yaratilgan.',
+                    'Ushbu mobil ilova aholining (ayniqsa, chekka hududlardagi fuqarolarning) kadastr sohasidagi huquqiy savodxonligini oshirish, firibgarlik va noqonuniy talablardan himoya qilish hamda amaldagi barcha davlat xizmatlaridan ortiqcha xarajatsiz, oson foydalanishlariga ko‘maklashish maqsadida yaratilgan.',
                     style: TextStyle(fontSize: 13, height: 1.4, color: Colors.black87),
                   ),
                 ],
@@ -454,17 +571,18 @@ class DetailScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Bu xizmat nima uchun kerak?', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                const Text('Bu xizmat nima uchun kerak?', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0D47A1))),
                 const SizedBox(height: 6),
-                Text(service.purpose),
+                Text(service.purpose, style: const TextStyle(height: 1.3)),
                 const Divider(height: 20),
                 Text('Bitish muddati: ${service.duration}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                Text('To‘lov: ${service.cost}'),
+                const SizedBox(height: 4),
+                Text('To‘lov: ${service.cost}', style: const TextStyle(color: Colors.black87)),
               ],
             ),
           ),
@@ -491,6 +609,7 @@ class DetailScreen extends StatelessWidget {
                   Text(d.simpleName, style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0D47A1))),
                   const SizedBox(height: 4),
                   Text('Qayerdan olasiz: ${d.whereToGet}', style: const TextStyle(fontSize: 13)),
+                  const SizedBox(height: 2),
                   Text('Bu nima: ${d.explanation}', style: TextStyle(fontSize: 12, color: Colors.grey.shade700)),
                 ],
               ),
@@ -583,8 +702,8 @@ class _CheckScreenState extends State<CheckScreen> {
                 const SizedBox(height: 6),
                 Text(
                   isComplete
-                      ? 'Endi bemalol DXM (Yagona darcha)ga borishingiz mumkin. Hech kim sizdan ortiqcha qog‘oz talab qila olmaydi.'
-                      : 'Belgilanmagan hujjatlarni yuqorida ko‘rsatilgan joydan olib, keyin boring.',
+                      ? 'Endi bemalol DXM (Yagona darcha)ga borishingiz yoki my.gov.uz orqali ariza yuborishingiz mumkin. Hech kim sizdan ortiqcha qog‘oz talab qila olmaydi.'
+                      : 'Belgilanmagan hujjatlarni yuqorida ko‘rsatilgan joydan olib, keyin murojaat qiling.',
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 13),
                 ),
