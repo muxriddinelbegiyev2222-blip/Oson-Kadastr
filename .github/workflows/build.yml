@@ -28,6 +28,11 @@ jobs:
         run: |
           flutter create . --org uz.osonkadastr --platforms android
 
+      - name: Yangi ilova belgisini (icon) yaratish
+        run: |
+          flutter pub get
+          dart run flutter_launcher_icons
+
       - name: APK yig'ish
         run: flutter build apk --release
 
