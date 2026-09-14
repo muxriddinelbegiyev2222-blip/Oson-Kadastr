@@ -1,1357 +1,772 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const OsonKadastrApp());
+  runApp(const CadastrePortalApp());
 }
 
-class OsonKadastrApp extends StatelessWidget {
-  const OsonKadastrApp({super.key});
+class CadastrePortalApp extends StatefulWidget {
+  const CadastrePortalApp({super.key});
+
+  @override
+  State<CadastrePortalApp> createState() => _CadastrePortalAppState();
+}
+
+class _CadastrePortalAppState extends State<CadastrePortalApp> {
+  String _currentLang = 'uz_lat'; // uz_lat, uz_cyr, ru
+
+  void _changeLanguage(String langCode) {
+    setState(() {
+      _currentLang = langCode;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Oson Kadastr',
       debugShowCheckedModeBanner: false,
+      title: 'Kadastr & Davlat Xizmatlari',
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0D47A1)),
         useMaterial3: true,
+        primaryColor: const Color(0xFF0F3973),
+        scaffoldBackgroundColor: const Color(0xFFF1F5F9),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: const Color(0xFF0F3973),
+          primary: const Color(0xFF0F3973),
+          secondary: const Color(0xFF0284C7),
+        ),
       ),
-      home: const HomeScreen(),
+      home: HomeScreen(
+        currentLang: _currentLang,
+        onLanguageChanged: _changeLanguage,
+      ),
     );
   }
 }
 
-// ---------------- HUJJAT VA XIZMAT MODELLARI ----------------
-class RequiredDocument {
-  final String simpleName;
-  final String officialName;
-  final String whatIsIt;
-  final String insideContent;
-  final String whereToGet;
+// --- MA'LUMOTLAR BAZASI (3 Tilda) ---
+final Map<String, Map<String, dynamic>> appData = {
+  'uz_lat': {
+    'app_title': 'DAVLAT KADASTR XIZMATLARI',
+    'app_subtitle': 'Shaffof, tezkor va korrupsiyasiz yagona portal',
+    'search_hint': 'Xizmat nomi yoki bo‘limini qidiring...',
+    'anti_corr_title': 'Korrupsiyaga chek qo‘yish',
+    'anti_corr_desc': 'Tamagirlik yoki noqonuniy to‘lov talab qilindimi? Darhol xabar bering!',
+    'anti_corr_dialog_title': 'Xavfsizlik va Nazorat Markazi',
+    'anti_corr_dialog_body':
+        'Hurmatli fuqaro!\n\nDavlat xizmatlari uchun belgilangan rasmiy to‘lovlardan tashqari hech qanday vositachi yoki naqd pul berish taqiqlanadi.\n\nQonunbuzarlik holatlarida quyidagi raqamlarga murojaat qiling:\n• Bosh prokuratura: 1007\n• Korrupsiyaga qarshi agentlik: 1253\n• Ishonch telefoni: 1148 / 1097',
+    'btn_details': 'Batafsil ma’lumot',
+    'lbl_term': 'Ijro muddati:',
+    'lbl_cost': 'Davlat to‘lovi:',
+    'lbl_docs': 'Kerakli hujjatlar:',
+    'lbl_rules': 'Shaffoflik kafolati:',
+    'btn_online_apply': 'Arizani onlayn topshirish',
+    'services': [
+      {
+        'icon': Icons.assignment_outlined,
+        'title': 'Kadastr pasportini shakllantirish',
+        'category': 'Ko‘chmas mulk',
+        'term': '5 - 10 ish kuni',
+        'cost': 'BHMning 25% dan boshlab',
+        'desc': 'Ko‘chmas mulk ob’ektlariga elektron kadastr yig‘majildini tayyorlash va pasport rasmiylashtirish.',
+        'docs': 'Mulk huquqini tasdiqlovchi hujjat, pasport/ID nusxasi.',
+        'rules': 'Inson omilisiz elektron shakllanadi. Barcha jarayon onlayn SMS orqali kuzatib boriladi.'
+      },
+      {
+        'icon': Icons.home_work_outlined,
+        'title': 'Mulk huquqini davlat ro‘yxatidan o‘tkazish',
+        'category': 'Davlat reyestri',
+        'term': '2 ish kuni',
+        'cost': 'BHM 1 baravari',
+        'desc': 'Xarid qilingan, meros qolgan yoki hadya etilgan mulkni Milliy reyestrga kiritish.',
+        'docs': 'Notarial shartnoma, order yoki sud qarori.',
+        'rules': 'Reyestrga kiritilgach QR-kodli elektron davlat guvohnomasi yuklab olish uchun beriladi.'
+      },
+      {
+        'icon': Icons.straighten_outlined,
+        'title': 'Yer uchastkasi chegaralarini belgilash',
+        'category': 'Yer resurslari',
+        'term': '3 - 5 ish kuni',
+        'cost': 'Shartnoma asosida',
+        'desc': 'Yer maydonining aniq koordinatalarini aniqlash va chegaralarni elektron xaritaga bog‘lash.',
+        'docs': 'Ajratish qarori, auksion bayonnomasi.',
+        'rules': 'Topografik o‘lchovlar avtomatik geoportallar tizimiga muhrlanadi.'
+      },
+      {
+        'icon': Icons.verified_user_outlined,
+        'title': 'Mulk mavjudligi haqida ma’lumotnoma',
+        'category': 'Ma’lumotnomalar',
+        'term': '15 daqiqa (Avtomatlashtirilgan)',
+        'cost': 'Bepul / BHM 5%',
+        'desc': 'Fuqaro yoki yuridik shaxs nomida bino/yer bor-yo‘qligini tasdiqlovchi elektron hujjat.',
+        'docs': 'JShShIR (PINFL) raqami va E-imzo.',
+        'rules': 'Hech qanday navbatsiz va inspektorsiz to‘g‘ridan-to‘g‘ri ma’lumotlar bazasidan beriladi.'
+      },
+      {
+        'icon': Icons.domain_add_outlined,
+        'title': 'Bino va inshootlarni qayta loyihalash ruxsati',
+        'category': 'Qurilish va arxitektura',
+        'term': '5 ish kuni',
+        'cost': 'BHM 30%',
+        'desc': 'Xonalarni qayta rejalashtirish yoki qo‘shimcha qurilishlar uchun elektron ruxsatnoma.',
+        'docs': 'Loyiha-smeta hujjati, mulkdor roziligi.',
+        'rules': 'Arxitektura kengashi tomonidan to‘liq raqamlashtirilgan tartibda ko‘rib chiqiladi.'
+      },
+    ]
+  },
+  'uz_cyr': {
+    'app_title': 'ДАВЛАТ КАДАСТР ХИЗМАТЛАРИ',
+    'app_subtitle': 'Шаффоф, тезкор ва коррупциясиз ягона портал',
+    'search_hint': 'Хизмат номи ёки бўлимини қидиринг...',
+    'anti_corr_title': 'Коррупцияга чек қўйиш',
+    'anti_corr_desc': 'Тамагирлик ёки ноқонуний тўлов талаб қилиндими? Дарҳол хабар беринг!',
+    'anti_corr_dialog_title': 'Хавфсизлик ва Назорат Маркази',
+    'anti_corr_dialog_body':
+        'Ҳурматли фуқаро!\n\nДавлат хизматлари учун белгиланган расмий тўловлардан ташқари ҳеч қандай воситачи ёки нақд пул бериш тақиқланади.\n\nҚонунбузарлик ҳолатларида қуйидаги рақамларга мурожаат қилинг:\n• Бош прокуратура: 1007\n• Коррупцияга қарши агентлик: 1253\n• Ишонч телефони: 1148 / 1097',
+    'btn_details': 'Батафсил маълумот',
+    'lbl_term': 'Ижро муддати:',
+    'lbl_cost': 'Давлат тўлови:',
+    'lbl_docs': 'Керакли ҳужжатлар:',
+    'lbl_rules': 'Шаффофлик кафолати:',
+    'btn_online_apply': 'Аризани онлайн топшириш',
+    'services': [
+      {
+        'icon': Icons.assignment_outlined,
+        'title': 'Кадастр паспортини шакллантириш',
+        'category': 'Кўчмас мулк',
+        'term': '5 - 10 иш куни',
+        'cost': 'БҲМнинг 25% дан бошлаб',
+        'desc': 'Кўчмас мулк объектларига электрон кадастр йиғмажилдини тайёрлаш ва паспорт расмийлаштириш.',
+        'docs': 'Мулк ҳуқуқини тасдиқловчи ҳужжат, паспорт/ID нусхаси.',
+        'rules': 'Инсон омилисиз электрон шаклланади. Барча жараён онлайн SMS орқали кузатиб борилади.'
+      },
+      {
+        'icon': Icons.home_work_outlined,
+        'title': 'Мулк ҳуқуқини давлат рўйхатидан ўтказиш',
+        'category': 'Давлат реестри',
+        'term': '2 иш куни',
+        'cost': 'БҲМ 1 баравари',
+        'desc': 'Харид қилинган, мерос қолган ёки ҳадя этилган мулкни Миллий реестрга киритиш.',
+        'docs': 'Нотариал шартнома, ордер ёки суд қарори.',
+        'rules': 'Реестрга киритилгач QR-кодли электрон давлат гувоҳномаси юклаб олиш учун берилади.'
+      },
+      {
+        'icon': Icons.straighten_outlined,
+        'title': 'Ер участкаси чегараларини белгилаш',
+        'category': 'Ер ресурслари',
+        'term': '3 - 5 иш куни',
+        'cost': 'Шартнома асосида',
+        'desc': 'Ер майдонининг аниқ координаталарини аниқлаш ва чегараларни электрон харитага боғлаш.',
+        'docs': 'Ажратиш қарори, аукцион баённомаси.',
+        'rules': 'Топографик ўлчовлар автоматик геопорталлар тизимига муҳрланади.'
+      },
+      {
+        'icon': Icons.verified_user_outlined,
+        'title': 'Мулк мавжудлиги ҳақида маълумотнома',
+        'category': 'Маълумотномалар',
+        'term': '15 дақиқа (Автоматлаштирилган)',
+        'cost': 'Бепул / БҲМ 5%',
+        'desc': 'Фуқаро ёки юридик шахс номида бино/ер бор-йўқлигини тасдиқловчи электрон ҳужжат.',
+        'docs': 'ЖШШИР (ПИНФЛ) рақами ва Э-имзо.',
+        'rules': 'Ҳеч қандай навбатсиз ва инспекторсиз тўғридан-тўғри маълумотлар базасидан берилади.'
+      },
+      {
+        'icon': Icons.domain_add_outlined,
+        'title': 'Бино ва иншоотларни қайта лойиҳалаш рухсати',
+        'category': 'Қурилиш ва архитектура',
+        'term': '5 иш куни',
+        'cost': 'БҲМ 30%',
+        'desc': 'Хоналарни қайта режалаштириш ёки қўшимча қурилишлар учун электрон рухсатнома.',
+        'docs': 'Лойиҳа-смета ҳужжати, мулкдор розилиги.',
+        'rules': 'Архитектура кенгаши томонидан тўлиқ рақамлаштирилган тартибда кўриб чиқилади.'
+      },
+    ]
+  },
+  'ru': {
+    'app_title': 'ГОСУДАРСТВЕННЫЙ КАДАСТР',
+    'app_subtitle': 'Прозрачный и единый портал без коррупции и очередей',
+    'search_hint': 'Поиск услуги или раздела...',
+    'anti_corr_title': 'Противодействие коррупции',
+    'anti_corr_desc': 'Столкнулись с вымогательством или незаконным сбором? Сообщите нам!',
+    'anti_corr_dialog_title': 'Центр Безопасности и Контроля',
+    'anti_corr_dialog_body':
+        'Уважаемый гражданин!\n\nВсе платежи производятся исключительно по государственным официальным квитанциям.\n\nПри правонарушениях обращайтесь:\n• Генеральная прокуратура: 1007\n• Агентство по противодействию коррупции: 1253\n• Горячая линия: 1148 / 1097',
+    'btn_details': 'Подробнее',
+    'lbl_term': 'Срок исполнения:',
+    'lbl_cost': 'Госпошлина:',
+    'lbl_docs': 'Необходимые документы:',
+    'lbl_rules': 'Гарантия прозрачности:',
+    'btn_online_apply': 'Подать электронное заявление',
+    'services': [
+      {
+        'icon': Icons.assignment_outlined,
+        'title': 'Оформление кадастрового паспорта',
+        'category': 'Недвижимость',
+        'term': '5 - 10 рабочих дней',
+        'cost': 'От 25% БРВ',
+        'desc': 'Формирование электронного кадастрового дела и изготовление паспорта объекта.',
+        'docs': 'Правоустанавливающий документ, копия паспорта/ID.',
+        'rules': 'Полностью электронный процесс без прямого контакта с инспекторами.'
+      },
+      {
+        'icon': Icons.home_work_outlined,
+        'title': 'Госрегистрация прав на недвижимость',
+        'category': 'Единый реестр',
+        'term': '2 рабочих дня',
+        'cost': '1 БРВ',
+        'desc': 'Внесение прав собственности на недвижимость в Государственный реестр.',
+        'docs': 'Нотариальный договор, ордер или решение суда.',
+        'rules': 'После регистрации выдается электронная выписка с защищенным QR-кодом.'
+      },
+      {
+        'icon': Icons.straighten_outlined,
+        'title': 'Определение границ земельного участка',
+        'category': 'Земельный фонд',
+        'term': '3 - 5 рабочих дней',
+        'cost': 'На договорной основе',
+        'desc': 'Геодезическая съемка, фиксация точных поворотных точек и границ на карте.',
+        'docs': 'Решение о выделении, протокол аукциона.',
+        'rules': 'Координаты фиксируются в геоинформационной системе автоматически.'
+      },
+      {
+        'icon': Icons.verified_user_outlined,
+        'title': 'Справка о наличии/отсутствии жилья',
+        'category': 'Справки',
+        'term': '15 минут (Автоматически)',
+        'cost': 'Бесплатно / 5% БРВ',
+        'desc': 'Официальная электронная выписка о наличии зарегистрированного имущества.',
+        'docs': 'ПИНФЛ и электронная подпись (ЭЦП).',
+        'rules': 'Генерируется базой данных в режиме реального времени.'
+      },
+      {
+        'icon': Icons.domain_add_outlined,
+        'title': 'Разрешение на перепланировку помещений',
+        'category': 'Строительство и архитектура',
+        'term': '5 рабочих дней',
+        'cost': '30% БРВ',
+        'desc': 'Согласование перепланировок, сноса некапитальных стен или пристроек.',
+        'docs': 'Проектный план, согласие всех собственников.',
+        'rules': 'Рассматривается градостроительным советом в цифровом формате.'
+      },
+    ]
+  }
+};
 
-  RequiredDocument({
-    required this.simpleName,
-    required this.officialName,
-    required this.whatIsIt,
-    required this.insideContent,
-    required this.whereToGet,
-  });
-}
-
-class KadastrService {
-  final String id;
-  final String titleSimple;
-  final String titleOfficial;
-  final String category;
-  final String purpose;
-  final String duration;
-  final String cost;
-  final List<RequiredDocument> docs;
-  final List<String> illegalDemands;
-  final String warningTip;
-
-  KadastrService({
-    required this.id,
-    required this.titleSimple,
-    required this.titleOfficial,
-    required this.category,
-    required this.purpose,
-    required this.duration,
-    required this.cost,
-    required this.docs,
-    required this.illegalDemands,
-    required this.warningTip,
-  });
-}
-
-// ---------------- JAMI 22 TA MUKAMMAL KADASTR DAVLAT XIZMATI ----------------
-final List<KadastrService> kadastrServices = [
-  // 1
-  KadastrService(
-    id: '1',
-    titleSimple: 'Turar joyga kadastr pasportini shakllantirish',
-    titleOfficial: 'Ko‘chmas mulk obyektiga (turar joy) kadastr pasportini berish (VM 535-son qaror)',
-    category: 'Kadastr pasporti',
-    purpose: 'Kvartira yoki yakka tartibdagi hovli uyning texnik parametrlarini o‘lchab, rasmiy elektron pasport va raqamli chizmasini tayyorlash.',
-    duration: 'Kvartira uchun — 3 ish kuni; Yakka tartibdagi hovli uy uchun — 5 ish kuni',
-    cost: 'Maydoniga qarab hisoblangan invoys bo‘yicha (my.gov.uz orqali 10% chegirma)',
-    warningTip: 'Agar uyingizda rekonstruksiya yoki yangi xona qurilgan bo‘lsa, arxitektura ruxsatnomasisiz o‘zboshimchalik deb topiladi. Qo‘ldan pul bermang, to‘lov faqat SMS-invoys orqali!',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Mulk huquqini tasdiqlovchi hujjat',
-        officialName: 'Huquq belgilovchi hujjat (Bitim, qaror, order)',
-        whatIsIt: 'Siz bu uyga qanday qilib qonuniy ega bo‘lganingizni isbotlovchi gerbli asosiy hujjat.',
-        insideContent: '• Notarius muhri, bitim sanasi va reyestr raqami (yoki hokimlik gerbli muhri);\n• Mulkdorning to‘liq F.I.Sh. va pasport maʼlumotlari;\n• Mulkning aniq manzili.',
-        whereToGet: 'Bitim tuzilgan notarial idoradan, tuman hokimligi devonxonasidan yoki davlat arxividan.',
-      ),
-      RequiredDocument(
-        simpleName: 'Shaxsni tasdiqlovchi hujjat (JShSHIR)',
-        officialName: 'Pasport yoki identifikatsiya ID-kartasi',
-        whatIsIt: 'Ariza beruvchining shaxsi va 14 xonali unikal JShSHIR kodini tasdiqlovchi hujjat.',
-        insideContent: '• Shaxsiy fotosurat, F.I.Sh. va 14 xonali JShSHIR raqami.',
-        whereToGet: 'Yoningizda bo‘lishi kifoya. Nusxa qoldirish talab etilmaydi.',
-      ),
-      RequiredDocument(
-        simpleName: 'Qayta qurish bo‘lsa — Loyiha va Ruxsatnoma',
-        officialName: 'APZ va Qurilish bo‘limi ruxsatnomasi',
-        whatIsIt: 'Agar hovlida yangi xona qurilgan yoki devorlar surilgan bo‘lsa, Qurilish va arxitektura bo‘limi ruxsati.',
-        insideContent: '• Shaharsozlik kengashi tasdig‘i;\n• Kelishilgan chizma loyiha va xavfsizlik xulosasi.',
-        whereToGet: 'Yagona darcha (DXM) yoki my.gov.uz orqali Qurilish bo‘limidan olinadi.',
-      ),
-    ],
-    illegalDemands: ['Mahalladan maʼlumotnoma', 'Qo‘shnilar tilxati', 'Kommunal to‘lov cheklari'],
-  ),
-
-  // 2
-  KadastrService(
-    id: '2',
-    titleSimple: 'Tadbirkorlik va noturar binolarga kadastr pasporti olish',
-    titleOfficial: 'Ko‘chmas mulk obyektiga (noturar bino) kadastr pasportini berish',
-    category: 'Kadastr pasporti',
-    purpose: 'Do‘kon, ofis, savdo markazi, sex yoki omborxona kabi tijorat obyektlarining elektron kadastr pasportini rasmiylashtirish.',
-    duration: '100 kv.mgacha — 5 ish kuni; 1000 kv.mgacha — 7 ish kuni; 5000 kv.mgacha — 10 ish kuni',
-    cost: 'Belgilangan davlat tarif stavkasi bo‘yicha (invoys asosida)',
-    warningTip: 'Tadbirkorlik binolarida qurilish nazorati inspeksiyasi (GASN) xulosasi bo‘lishi shart. Vositachilarga aldanmang!',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Mulk huquqi yoki yer ajratish hujjati',
-        officialName: 'Oldi-sotdi shartnomasi / E-auksion bayonnomasi / Qaror',
-        whatIsIt: 'Bino yoki bino joylashgan yer sizniki ekanini bildiruvchi qonuniy hujjat.',
-        insideContent: '• Mulkdor rekvizitlari, faoliyat turi va binoning ruxsat etilgan maqsadi.',
-        whereToGet: 'E-auksion tizimidan, notariusdan yoki davlat arxividan.',
-      ),
-      RequiredDocument(
-        simpleName: 'Foydalanishga qabul qilish dalolatnomasi (GASN)',
-        officialName: 'Tugallangan qurilish obyektini foydalanishga qabul qilish to‘g‘risidagi ruxsatnoma',
-        whatIsIt: 'Qurilish nazorati inspeksiyasi tomonidan bino xavfsiz qurilganini tasdiqlovchi rasmiy dalolatnoma.',
-        insideContent: '• Qabul qilish komissiyasining elektron QR-kodli xulosasi va ro‘yxat raqami.',
-        whereToGet: 'Qurilish vazirligi hududiy inspeksiyasi orqali DXMda olinadi.',
-      ),
-    ],
-    illegalDemands: ['Soliqdan qarz yo‘qligi maʼlumotnomasi', 'Hokimiyatning alohida yozma xati'],
-  ),
-
-  // 3
-  KadastrService(
-    id: '3',
-    titleSimple: 'Mulk huquqini davlat ro‘yxatidan o‘tkazish (Reyestr)',
-    titleOfficial: 'Ko‘chmas mulkka bo‘lgan huquqlarni davlat ro‘yxatidan o‘tkazish (VM 535-son qaror)',
-    category: 'Davlat ro‘yxati',
-    purpose: 'Notariusda tuzilgan oldi-sotdi, hadya, meros shartnomasidan so‘ng yangi mulkdorni Yagona davlat reyestriga rasman kiritish.',
-    duration: '2 ish kuni',
-    cost: 'BHMning 1 dan 1.25 baravarigacha',
-    warningTip: 'Notarial bitim tuzilgandan so‘ng 1 oy ichida davlat ro‘yxatidan o‘tkazilmasa, maʼmuriy jarima qo‘llaniladi.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Huquq vujudga kelganini tasdiqlovchi hujjat',
-        officialName: 'Notarial tasdiqlangan shartnoma, meros guvohnomasi yoki sud qarori',
-        whatIsIt: 'Uy sizga rasman o‘tganini tasdiqlovchi gerbli notarial blanka.',
-        insideContent: '• Notarius muhri, bitim sanasi va elektron reyestr raqami.',
-        whereToGet: 'Notarial idoradan shartnoma imzolangan zahoti beriladi.',
-      ),
-      RequiredDocument(
-        simpleName: 'Obyekt kadastr pasporti',
-        officialName: 'Elektron kadastr yig‘majildi',
-        whatIsIt: 'Mulkning chizmasi va xususiyatlari jamlangan hujjat.',
-        insideContent: '• Mulkning unikal kadastr raqami va texnik ko‘rsatkichlari.',
-        whereToGet: 'Kadastr bazasidan avtomatik olinadi.',
-      ),
-    ],
-    illegalDemands: ['Notarius tasdiqlagan qog‘ozni hokimiyatda qayta muhrlatish'],
-  ),
-
-  // 4
-  KadastrService(
-    id: '4',
-    titleSimple: 'Davlat reyestridan ko‘chirma olish (Mulkdorlik hujjati)',
-    titleOfficial: 'Ko‘chmas mulk bo‘yicha davlat reyestridan ko‘chirma berish',
-    category: 'Maʼlumotnoma',
-    purpose: 'Ayni daqiqada mulk kimning nomida turganini isbotlab beruvchi QR-kodli rasmiy davlat hujjati.',
-    duration: '1 ish kuni (real vaqtda avtomatik)',
-    cost: 'BHMning 0.05 baravari',
-    warningTip: 'Eski ko‘k muhrli qog‘oz guvohnomalar bekor bo‘lgan, hozirgi kunda mana shu QR-kodli ko‘chirma yagona yuridik kuchga ega.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Mulkning kadastr raqami',
-        officialName: 'Unikal ko‘chmas mulk kadastr raqami',
-        whatIsIt: '10:01:... shaklidagi mulkning yagona davlat raqami.',
-        insideContent: '• Hududiy zona, massiv va bino kodi.',
-        whereToGet: 'Kadastr pasportidan yoki my.gov.uz dagi shaxsiy kabinetdan olinadi.',
-      ),
-    ],
-    illegalDemands: ['Kadastr inspektorining joyiga kelib ko‘rishi'],
-  ),
-
-  // 5
-  KadastrService(
-    id: '5',
-    titleSimple: 'Nomida shaxsiy turar joy yo‘qligi haqida maʼlumotnoma',
-    titleOfficial: 'Fuqaroning nomida shaxsiy turar joy mavjud emasligi to‘g‘risida maʼlumotnoma',
-    category: 'Maʼlumotnoma',
-    purpose: 'Davlat subsidiyasi, arzon ipoteka krediti yoki uy-joy navbatiga turish uchun nomingizda uy yo‘qligini tasdiqlash.',
-    duration: 'Avtomatik (1 kun ichida)',
-    cost: 'BHMning 0.05 baravari',
-    warningTip: 'Respublika bo‘yicha barcha viloyat bazalari JShSHIR bo‘yicha avtomatik tekshiriladi.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Pasport / ID-karta (JShSHIR)',
-        officialName: 'Ariza beruvchining 14 xonali JShSHIR raqami',
-        whatIsIt: 'O‘zbekiston fuqarosining yagona identifikatsiya kodi.',
-        insideContent: '• Shaxsiy maʼlumotlar va JShSHIR.',
-        whereToGet: 'ID-kartangizning orqa tomonida bo‘ladi.',
-      ),
-    ],
-    illegalDemands: ['Mahalladan maʼlumotnoma so‘rash'],
-  ),
-
-  // 6
-  KadastrService(
-    id: '6',
-    titleSimple: 'Mulkda taqiq (Zapret) bor-yo‘qligini tekshirish',
-    titleOfficial: 'Ko‘chmas mulk bo‘yicha taqiq va xatlovlar mavjudligi to‘g‘risida maʼlumotnoma',
-    category: 'Maʼlumotnoma',
-    purpose: 'Mulkka sud, MIB ijrosi, notarius yoki bank tomonidan taqiq qo‘yilgan-qo‘yilmaganligini oldindan aniqlash.',
-    duration: 'Real vaqtda (1 kun)',
-    cost: 'BHMning 0.05 baravari',
-    warningTip: 'Taqiqi bor uyni sotib olmang va taqiq yechilmaguncha zaklad bermang!',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Uyning kadastr raqami',
-        officialName: 'Ko‘chmas mulk kadastr raqami',
-        whatIsIt: 'Sotib olinayotgan uyning unikal raqami.',
-        insideContent: '• Mulkning to‘liq manzili va xususiyatlari.',
-        whereToGet: 'Sotuvchining kadastr pasportidan olinadi.',
-      ),
-    ],
-    illegalDemands: ['MIB bo‘limiga borib imzo qo‘ydirib kelish'],
-  ),
-
-  // 7
-  KadastrService(
-    id: '7',
-    titleSimple: 'Hovli yoki uyni ikkiga bo‘lish (Alohida qilish)',
-    titleOfficial: 'Ko‘chmas mulk obyektini bo‘lish yoki birlashtirish bo‘yicha davlat xizmati',
-    category: 'Chegaralar',
-    purpose: 'Bitta umumiy hovlini mulkdorlar o‘rtasida alohida mustaqil ikki yoki undan ortiq xonadonlarga ajratish.',
-    duration: '10 dan 15 ish kunigacha',
-    cost: 'Maydoni va meʼmoriy chizmasiga asosan',
-    warningTip: 'Har bir yangi hosil bo‘ladigan hovlida umumiy ko‘chaga mustaqil chiqish darvozasi bo‘lishi shart.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Taqsimlash kelishuvi yoki sud ajrimi',
-        officialName: 'Notarial tasdiqlangan bo‘lish bitimi yoki sud qarori',
-        whatIsIt: 'Mulkdorlar uyni qaysi devordan ajratishga kelishgani hujjati.',
-        insideContent: '• Reja va har bir tomonning ulushlari.',
-        whereToGet: 'Notarial idorada rasmiylashtiriladi yoki suddan olinadi.',
-      ),
-      RequiredDocument(
-        simpleName: 'Qurilish bo‘limi xulosasi',
-        officialName: 'Binoni bo‘lishning shaharsozlik jihatdan mumkinligi haqida xulosa',
-        whatIsIt: 'Imoratni bo‘lganda yuk ko‘taruvchi devorlarga ziyon yetmasligini tasdiqlovchi hujjat.',
-        insideContent: '• Arxitektor ko‘rigi bayonnomasi.',
-        whereToGet: 'Tuman qurilish va arxitektura bo‘limidan olinadi.',
-      ),
-      RequiredDocument(
-        simpleName: 'Mavjud umumiy kadastr pasporti',
-        officialName: 'Asl kadastr yig‘majildi',
-        whatIsIt: 'Uyning butun holatdagi hujjati.',
-        insideContent: '• Barcha maydon va chegaralar.',
-        whereToGet: 'Mulkdorning qo‘lida bo‘ladi.',
-      ),
-    ],
-    illegalDemands: ['Kommunal xizmatlarning yangi hisob raqamlarini oldindan talab qilish'],
-  ),
-
-  // 8
-  KadastrService(
-    id: '8',
-    titleSimple: 'Ko‘p kvartirali uy oldidagi tutash yerlarni rasmiylashtirish',
-    titleOfficial: 'Ko‘p kvartirali uyga tutash yer uchastkasini ro‘yxatdan o‘tkazish',
-    category: 'Yer uchastkasi',
-    purpose: 'Dom oldidagi maydonni aholining umumiy foydalanishdagi mulki sifatida rasmiylashtirish.',
-    duration: '10 ish kuni',
-    cost: 'Bepul / Minimal stavka',
-    warningTip: 'Bu yer bitta shaxsga sotilmaydi, faqat butun dom egalariga tegishli umumiy daxlsiz yer bo‘ladi.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Mulkdorlar umumiy yig‘ilishi bayonnomasi',
-        officialName: 'Ko‘p kvartirali uy mulkdorlarining umumiy yig‘ilishi qarori',
-        whatIsIt: 'Domda yashovchilarning 50% dan ortig‘i yerni rasmiylashtirishga rozi bo‘lgan bayonnoma.',
-        insideContent: '• Mulkdorlar ro‘yxati, xonadon raqamlari va shaxsiy imzolari.',
-        whereToGet: 'BSHM yoki mahalla bilan birga tuziladi.',
-      ),
-    ],
-    illegalDemands: ['Har bir xonadondan alohida pulli ariza so‘rash'],
-  ),
-
-  // 9
-  KadastrService(
-    id: '9',
-    titleSimple: 'Bino va inshootlar ijara shartnomasini ro‘yxatdan o‘tkazish',
-    titleOfficial: 'Ko‘chmas mulk ijara shartnomasini davlat ro‘yxatidan o‘tkazish',
-    category: 'Davlat ro‘yxati',
-    purpose: 'Noturar bino yoki sexni 1 yildan ortiq muddatga ijaraga berganda huquqni mustahkamlash.',
-    duration: '2 ish kuni',
-    cost: 'BHMning 0.5 baravari',
-    warningTip: '1 yildan oshiq muddatli ijaralar kadastrda ro‘yxatdan o‘tmasa, sudda haqiqiy sanalmaydi.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Ijara shartnomasi',
-        officialName: 'Notarial yoki elektron yozma ijara bitimi',
-        whatIsIt: 'Ijara beruvchi va ijarachi o‘rtasidagi rasmiy shartnoma.',
-        insideContent: '• Ijara muddati, oylik to‘lov va faoliyat maqsadi.',
-        whereToGet: 'Notariusda yoki soliq tizimi orqali olinadi.',
-      ),
-    ],
-    illegalDemands: ['Binoni qayta inventarizatsiyadan o‘tkazish'],
-  ),
-
-  // 10
-  KadastrService(
-    id: '10',
-    titleSimple: 'Yer uchastkasi ijara shartnomasini ro‘yxatdan o‘tkazish',
-    titleOfficial: 'Yer uchastkasini uzoq muddatli ijaraga olish shartnomasini davlat ro‘yxatidan o‘tkazish',
-    category: 'Yer uchastkasi',
-    purpose: 'Fermer yoki tadbirkorlik yerlarini qonuniy o‘z nomingizga rasmiy mustahkamlash.',
-    duration: '2 ish kuni',
-    cost: 'BHMning 1 baravari',
-    warningTip: 'Faqat E-auksion yoki "E-yer" ochiq elektron tanlovida yutib olingan yerlar ro‘yxatga olinadi.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Elektron tanlov/auksion bayonnomasi',
-        officialName: 'Yer uchastkasi ijara huquqini berish bo‘yicha auksion bayonnomasi',
-        whatIsIt: 'Davlat ochiq tanlovida siz g‘olib bo‘lganingizni tasdiqlovchi QR-kodli hujjat.',
-        insideContent: '• Kontur raqami, gektar maydoni va ijara muddati.',
-        whereToGet: 'E-auksion.uz tizimidan yuklab olinadi.',
-      ),
-    ],
-    illegalDemands: ['Qishloq xo‘jaligi bo‘limidan qo‘shimcha rozilik xati'],
-  ),
-
-  // 11
-  KadastrService(
-    id: '11',
-    titleSimple: 'Ipoteka va garov huquqini ro‘yxatga olish / yechish',
-    titleOfficial: 'Ko‘chmas mulk ipotekasi va garov shartnomasini davlat ro‘yxatidan o‘tkazish',
-    category: 'Davlat ro‘yxati',
-    purpose: 'Kredit olayotganda uyni garovga qo‘yish yoki kredit yopilgach taqiqni yechish.',
-    duration: '1 ish kuni',
-    cost: 'BHMning 50% miqdorida',
-    warningTip: 'Kredit yopilgach, bank xodimi tizim orqali taqiqni bepul yechib berishi shart.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Ipoteka shartnomasi',
-        officialName: 'Notarial tasdiqlangan ipoteka (garov) shartnomasi',
-        whatIsIt: 'Mulk qaysi bankka, qancha kredit evaziga garovga qo‘yilganini bildiruvchi hujjat.',
-        insideContent: '• Kredit summasi va garovga qo‘yilgan uyning kadastr raqami.',
-        whereToGet: 'Bank va notariusdan beriladi.',
-      ),
-    ],
-    illegalDemands: ['Bank vakilining DXMga shaxsan borishi'],
-  ),
-
-  // 12
-  KadastrService(
-    id: '12',
-    titleSimple: 'Servitut kelishuvi (Qo‘shni yeridan yo‘l ochish)',
-    titleOfficial: 'Servitut huquqini davlat ro‘yxatidan o‘tkazish',
-    category: 'Yer uchastkasi',
-    purpose: 'Uyingizga kirish uchun qo‘shnining hovlisidan o‘tish huquqini qonuniylashtirish.',
-    duration: '2 ish kuni',
-    cost: 'BHMning 0.5 baravari',
-    warningTip: 'Servitut rasmiylashtirilsa, qo‘shni o‘zgarsa ham sizning o‘tish huquqingiz yo‘qolmaydi.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Servitut shartnomasi yoki sud qarori',
-        officialName: 'Notarial tasdiqlangan servitut bitimi yoki sud ajrimi',
-        whatIsIt: 'Qo‘shnilar yerning qaysi qismidan o‘tishga kelishgani xaritasi bilan.',
-        insideContent: '• Yo‘lning eni, uzunligi, koordinatalari va shartlari.',
-        whereToGet: 'Notariusda imzolanadi yoki suddan olinadi.',
-      ),
-    ],
-    illegalDemands: ['Qo‘shnining butun hovlisini qayta o‘lchash'],
-  ),
-
-  // 13
-  KadastrService(
-    id: '13',
-    titleSimple: 'Ko‘p yillik bog‘ va dov-daraxtlarga kadastr olish',
-    titleOfficial: 'Ko‘p yillik dov-daraxtlarga kadastr pasportini shakllantirish',
-    category: 'Kadastr pasporti',
-    purpose: 'Intensiv bog‘lar va mevali daraxtzorlarni ko‘chmas mulk sifatida hisobga olish.',
-    duration: '5 ish kuni',
-    cost: 'Bog‘ maydoniga qarab',
-    warningTip: 'Bog‘ barpo etilgan yerga bo‘lgan ijara yoki mulk huquqi bo‘lishi shart.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Bog‘ yerining hujjati',
-        officialName: 'Yer uchastkasi ijara shartnomasi yoki davlat ko‘chirmasi',
-        whatIsIt: 'Daraxt ekilgan yer sizga qonuniy biriktirilganini isbotlovchi hujjat.',
-        insideContent: '• Yer maydoni, konturi, daraxt navlari va ekilgan yili.',
-        whereToGet: 'Kadastr reyestridan.',
-      ),
-    ],
-    illegalDemands: ['Ekologiya idorasidan qo‘shimcha sertifikat talab qilish'],
-  ),
-
-  // 14
-  KadastrService(
-    id: '14',
-    titleSimple: 'Tadbirkorlik uchun yerni E-auksion orqali olish',
-    titleOfficial: 'Yer uchastkalarini tadbirkorlik uchun elektron auksion orqali ajratish',
-    category: 'Auksion',
-    purpose: 'Bo‘sh turgan davlat yerlarini savdo yoki ishlab chiqarish uchun halol, ochiq auksionda yutib olish.',
-    duration: 'Auksion reglamenti bo‘yicha',
-    cost: 'Auksionda shakllangan savdo bahosi',
-    warningTip: 'Hokimning yerni to‘g‘ridan-to‘g‘ri ajratish vakolati yo‘q! Birorta amaldorga ishonib pul bermang!',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Elektron raqamli imzo (ERI)',
-        officialName: 'ERI kaliti va sertifikati',
-        whatIsIt: 'Savdoda qatnashish va g‘oliblik bayonnomasini tasdiqlash uchun raqamli imzo.',
-        insideContent: '• Tashkilot yoki fuqaro nomiga rasmiylashtirilgan kalit.',
-        whereToGet: 'Davlat xizmatlari markazidan 10 daqiqada olinadi.',
-      ),
-    ],
-    illegalDemands: ['Auksiondan keyin hokimiyatdan qo‘shimcha farmoyish olish'],
-  ),
-
-  // 15
-  KadastrService(
-    id: '15',
-    titleSimple: 'Qishloq xo‘jaligi yerlarini ijaraga olish tanlovi',
-    titleOfficial: 'Qishloq xo‘jaligiga mo‘ljallangan yerlarni elektron ochiq tanlov orqali berish',
-    category: 'Yer uchastkasi',
-    purpose: 'Ekin ekish yoki issiqxona uchun yerlarni "E-yer" portali orqali ijaraga olish.',
-    duration: 'Tanlov reglamenti asosida',
-    cost: 'Tanlov shartlariga ko‘ra',
-    warningTip: 'G‘olib inson aralashuvisiz, kompyuter reytingi orqali ballar asosida aniqlanadi.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Fermerlik biznes-rejasi',
-        officialName: 'Yer uchastkasidan samarali foydalanish taklifi',
-        whatIsIt: 'Yerda nima yetishtirishingiz va investitsiya hajmi ko‘rsatilgan reja.',
-        insideContent: '• Ekin turlari, kiritiladigan investitsiya hajmi.',
-        whereToGet: 'Ariza beruvchining o‘zi tayyorlaydi.',
-      ),
-    ],
-    illegalDemands: ['Qishloq xo‘jaligi bo‘limidan alohida xat keltirish'],
-  ),
-
-  // 16
-  KadastrService(
-    id: '16',
-    titleSimple: 'Eski va yangi kadastr raqamlarini solishtirish',
-    titleOfficial: 'Ko‘chmas mulkning yangilangan kadastr raqami to‘g‘risida maʼlumotnoma',
-    category: 'Maʼlumotnoma',
-    purpose: 'Eski daftarchadagi raqam yangi elektron tizimda qaysi raqamga o‘zgarganini tasdiqlovchi maʼlumotnoma.',
-    duration: 'Avtomatik (1 ish kuni)',
-    cost: 'Bepul',
-    warningTip: 'Eski uyingiz notariusda chiqmay qolsa, shu maʼlumotnoma bilan ish bitadi.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Eski kadastr daftarchasi',
-        officialName: 'Eski namunadagi texnik pasport',
-        whatIsIt: 'Ilgari berilgan qog‘oz daftarcha.',
-        insideContent: '• Eski kadastr kodi va uy manzili.',
-        whereToGet: 'Shaxsiy arxiv hujjatlari orasidan olinadi.',
-      ),
-    ],
-    illegalDemands: ['Kadastr xodimini uyga chaqirib pul to‘lash'],
-  ),
-
-  // 17
-  KadastrService(
-    id: '17',
-    titleSimple: 'Uyga rasmiy ko‘cha nomi va manzil berish',
-    titleOfficial: 'Ko‘chmas mulk obyektiga manzil berish va o‘zgartirish (Manzillar reyestri)',
-    category: 'Davlat ro‘yxati',
-    purpose: 'Yangi qurilgan uyga tuman hokimiyati tomonidan rasmiy ko‘cha nomi va raqam berilishi.',
-    duration: '3 ish kuni',
-    cost: 'Bepul',
-    warningTip: 'Ko‘cha nomi o‘zgarganda hujjatlarni qayta o‘zgartirish majburiy emas, baza buni o‘zi taniydi.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Kadastr pasporti',
-        officialName: 'Mulk kadastr yig‘majildi',
-        whatIsIt: 'Uyning joylashgan koordinatasini ko‘rsatuvchi hujjat.',
-        insideContent: '• Obyektning amaldagi xaritasi va geografik nuqtasi.',
-        whereToGet: 'Mulkdorning qo‘lida bo‘ladi.',
-      ),
-    ],
-    illegalDemands: ['Mahalladan ko‘cha nomi haqida spravka so‘rash'],
-  ),
-
-  // 18
-  KadastrService(
-    id: '18',
-    titleSimple: 'Uy buzilishga (Snos) tushgan-tushmaganligini aniqlash',
-    titleOfficial: 'Ko‘chmas mulkning bosh rejaga asosan buzilishga tushganligi haqida maʼlumotnoma',
-    category: 'Maʼlumotnoma',
-    purpose: 'Shahar bosh rejasiga ko‘ra, uy o‘rnida yo‘l yoki boshqa inshoot tushishi rejalashtirilganini tekshirish.',
-    duration: '3 ish kuni',
-    cost: 'BHMning 0.05 baravari',
-    warningTip: 'Uy sotib olayotganda albatta bu maʼlumotnomani tekshiring!',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Kadastr raqami',
-        officialName: 'Obyekt kadastr raqami',
-        whatIsIt: 'Tekshirilayotgan xonadonning raqami.',
-        insideContent: '• Koordinatalar va joylashuv manzili.',
-        whereToGet: 'Kadastr pasportidan olinadi.',
-      ),
-    ],
-    illegalDemands: ['Arxitektura bo‘limiga shaxsan borib imzo to‘plash'],
-  ),
-
-  // 19
-  KadastrService(
-    id: '19',
-    titleSimple: 'Mulk buzilganda kadastr hisobidan chiqarish',
-    titleOfficial: 'Ko‘chmas mulkka bo‘lgan huquqning bekor qilinganligini davlat ro‘yxatidan o‘tkazish',
-    category: 'Davlat ro‘yxati',
-    purpose: 'Eski uy buzilib o‘rniga yangi qurilayotganda, eski uyni bazadan o‘chirish.',
-    duration: '2 ish kuni',
-    cost: 'BHMning 0.5 baravari',
-    warningTip: 'Buzilgan uyni bazadan chiqarmasangiz, yo‘q uy uchun soliq hisoblanaveradi.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Buzilganlik dalolatnomasi',
-        officialName: 'Bino mavjud emasligi to‘g‘risidagi komissiya dalolatnomasi',
-        whatIsIt: 'Bino joyida haqiqatda yo‘qligini tasdiqlovchi rasmiy qog‘oz.',
-        insideContent: '• Mahalla faollari va kadastr xodimi ishtirokidagi foto-dalolatnoma.',
-        whereToGet: 'Tuman kadastr bo‘limi va mahalladan tuziladi.',
-      ),
-    ],
-    illegalDemands: ['Eski orderlarni arxivdan qayta talab qilish'],
-  ),
-
-  // 20
-  KadastrService(
-    id: '20',
-    titleSimple: 'Topografik va geodezik xaritalar olish',
-    titleOfficial: 'Davlat kartografiya-geodeziya fondidan maʼlumotlar taqdim etish',
-    category: 'Geodeziya',
-    purpose: 'Katta inshootlar, korxonalar yoki yo‘l qurilish loyihalari uchun aniq geodezik xaritalarni olish.',
-    duration: '5 ish kuni',
-    cost: 'Xarita hajmiga qarab shartnoma asosida',
-    warningTip: 'Qurilishdan oldin aniq geodezik maʼlumot olinsa, yer osti quvurlariga shikast yetmaydi.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Loyiha texnik topshirig‘i',
-        officialName: 'Tashkilot buyurtmasi va loyihalash ruxsatnomasi',
-        whatIsIt: 'Qaysi hududning xaritasi nima uchun kerakligini ko‘rsatuvchi rasmiy so‘rov.',
-        insideContent: '• Koordinatalar chegarasi va masshtabi.',
-        whereToGet: 'Loyiha institutidan olinadi.',
-      ),
-    ],
-    illegalDemands: ['Litsenziyasiz shaxslar xizmatidan foydalanishga majburlash'],
-  ),
-
-  // 21
-  KadastrService(
-    id: '21',
-    titleSimple: 'Bino ostidagi yerni xususiylashtirish (Sotib olish)',
-    titleOfficial: 'Qishloq xo‘jaligiga mo‘ljallanmagan yer uchastkalarini xususiylashtirish',
-    category: 'Xususiylashtirish',
-    purpose: 'O‘zingizga qarashli bino yoki korxona turgan yerni shaxsiy xususiy mulk qilib sotib olish.',
-    duration: '10 ish kuni',
-    cost: 'Yer solig‘ining karrali stavkasida',
-    warningTip: 'Xususiylashtirilgan yer — daxlsiz xususiy mulk bo‘ladi.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Binoga bo‘lgan mulkchilik hujjati',
-        officialName: 'Bino kadastr pasporti va ro‘yxatdan o‘tganlik ko‘chirmasi',
-        whatIsIt: 'Yer ustidagi bino sizniki ekanini tasdiqlovchi hujjat.',
-        insideContent: '• Bino maydoni va unikal kadastr raqami.',
-        whereToGet: 'Kadastr reyestridan.',
-      ),
-    ],
-    illegalDemands: ['Hokimiyatning alohida yozma ruxsatnomasi'],
-  ),
-
-  // 22
-  KadastrService(
-    id: '22',
-    titleSimple: 'Hujjatsiz uylarni qonuniylashtirish (O‘RQ-937 Qonuni)',
-    titleOfficial: 'O‘zboshimchalik bilan egallangan yer uchastkalari hamda ularda qurilgan binolarga bo‘lgan huquqlarni eʼtirof etish (05.08.2024 yildagi O‘RQ-937-son Qonun)',
-    category: 'Qonuniylashtirish',
-    purpose: 'Ko‘p yillardan beri yashab kelayotgan, lekin hujjati bo‘lmagan xonadonlarga amaldagi O‘RQ-937-son Qonun doirasida qonuniy mulk huquqini eʼtirof etish.',
-    duration: 'Bosqichma-bosqich reja-jadval asosida (xatlov davomida)',
-    cost: 'Qonunda belgilangan bir martalik qonuniy yig‘im (BHM miqdorida)',
-    warningTip: 'OGOH BO‘LING: Hech kimga "men uyingizni amnistiyaga kiritib tezlashtirib beraman" degan maklerlarga pul bermang! Hududlar kadastr xodimlari tomonidan dron orqali va mahallama-mahalla bepul xatlov qilinadi.',
-    docs: [
-      RequiredDocument(
-        simpleName: 'Uzoq yillik to‘lovlar va foydalanish dalillari',
-        officialName: 'Yer va mol-mulk solig‘i cheklari, elektr, gaz, suv to‘lov daftarlari',
-        whatIsIt: 'Siz ushbu uyni ko‘p yillardan buyon egallab yashab kelayotganingizni tasdiqlovchi cheklar.',
-        insideContent: '• To‘lov qilingan sana va to‘lovchi F.I.Sh.',
-        whereToGet: 'Shaxsiy arxiv kvitansiyalari yoki bank/to‘lov tizimlari arxivlaridan.',
-      ),
-      RequiredDocument(
-        simpleName: 'Qurilish va arxitektura bo‘limi xulosasi',
-        officialName: 'Bino shaharsozlik va xavfsizlik talablariga muvofiqligi to‘g‘risida komissiya xulosasi',
-        whatIsIt: 'Imorat xavfli hududda (daryo muhofazasi, yuqori kuchlanish ostida) joylashmaganini tasdiqlovchi xulosa.',
-        insideContent: '• Maxsus komissiya ko‘rigi bayonnomasi.',
-        whereToGet: 'Xatlov jarayonida hududiy komissiya tomonidan bepul o‘rganiladi.',
-      ),
-    ],
-    illegalDemands: ['Vositachilik haqlari', 'Norasmiy komissiya yig‘imlari'],
-  ),
-];
-
-// ---------------- ALOHIDA: "HUJJATLAR QOMUSI" (LUG‘AT) ----------------
-class DocVocabulary {
-  final String term;
-  final String simpleExplanation;
-  final String whatIsInside;
-  final String whereToFind;
-
-  DocVocabulary({
-    required this.term,
-    required this.simpleExplanation,
-    required this.whatIsInside,
-    required this.whereToFind,
-  });
-}
-
-final List<DocVocabulary> docVocabularies = [
-  DocVocabulary(
-    term: 'Hokim Qarori (Qaror nima?)',
-    simpleExplanation: 'Tuman yoki shahar hokimi tomonidan fuqaro yoki korxonaga yer ajratish, uy qurishga ruxsat berish haqida chiqarilgan rasmiy buyruq qog‘ozi. (Hozirda yangi yer ajratish vakolati bekor qilingan, faqat eski qonuniy qarorlar kuchga ega).',
-    whatIsInside: '• Qaror qabul qilingan sana, hokim imzosi va dumaloq gerbli muhr;\n• Kimga, qancha yer va qanday maqsadda berilgani;\n• Yerning aniq joylashuvi va chegaralari.',
-    whereToFind: 'Qo‘lingizdagi asl nusxa yo‘qolgan bo‘lsa, tegishli tuman hokimligining devonxonasidan yoki viloyat davlat arxividan tasdiqlangan nusxasi olinadi.',
-  ),
-  DocVocabulary(
-    term: 'Oldi-sotdi shartnomasi nima?',
-    simpleExplanation: 'Siz uyni birovdan pul to‘lab sotib olganingizda, notarius ishtirokida imzolanadigan eng asosiy gerbli hujjat.',
-    whatIsInside: '• Sotuvchi va xaridorning pasport maʼlumotlari;\n• Mulkning aniq manzili va sotilgan summasi;\n• Notariusning gerbli muhri, maxsus blanka seriya raqami va reyestr yozuvi.',
-    whereToFind: 'Shartnoma tuzilgan notarial idoradan (dublikat sifatida olinishi mumkin).',
-  ),
-  DocVocabulary(
-    term: 'Mulk huquqi ko‘chirmasi (Vipiska) nima?',
-    simpleExplanation: 'Eski ko‘k muhrli qog‘oz guvohnomalar o‘rniga hozir beriladigan yagona elektron QR-kodli hujjat. Bu hujjat ayni daqiqada uy kimga tegishli ekanini isbotlaydi.',
-    whatIsInside: '• Mulkning unikal kadastr raqami;\n• Hozirgi qonuniy egasining F.I.Sh;\n• Mulk maydoni va haqiqiy ekanini tasdiqlovchi maxsus QR-kod.',
-    whereToFind: 'my.gov.uz portali orqali 1 daqiqada yuklab olinadi yoki Davlat xizmatlari markazidan olinadi.',
-  ),
-  DocVocabulary(
-    term: 'APZ (Arxitektura-rejalashtirish topshirig‘i) nima?',
-    simpleExplanation: 'Uy yoki bino qurishdan oldin tuman arxitektura bo‘limi tomonidan beriladigan ruxsatnoma. Unda bino necha qavat bo‘lishi, qo‘shnining devoridan necha metr uzoqda qurilishi kerakligi yoziladi.',
-    whatIsInside: '• Qavatlar soni, qizil chiziq chegaralari;\n• Muhandislik tarmoqlariga ulanish shartlari.',
-    whereToFind: 'my.gov.uz orqali yoki Davlat xizmatlari markazidan olinadi.',
-  ),
-  DocVocabulary(
-    term: 'Foydalanishga qabul qilish dalolatnomasi nima?',
-    simpleExplanation: 'Bino yangi qurib bitkazilgach, Qurilish nazorati inspeksiyasi (GASN) kelib bino xavfsiz qurilganini tasdiqlovchi hujjat.',
-    whatIsInside: '• Qurilish loyihasiga muvofiqlik bayonnomasi;\n• Yong‘in xavfsizligi va seysmik xulosalar.',
-    whereToFind: 'Qurilish va arxitektura nazorati inspeksiyasidan olinadi.',
-  ),
-  DocVocabulary(
-    term: 'Meros guvohnomasi nima?',
-    simpleExplanation: 'Uy egasi vafot etganidan so‘ng, uning uyi farzandlariga yoki qonuniy merosxo‘rlariga o‘tganini tasdiqlovchi rasmiy notarial hujjat.',
-    whatIsInside: '• Vafot etgan shaxsning o‘lim guvohnomasi rekvizitlari;\n• Merosxo‘rlarning qarindoshlik darajasi va ularga tekkan mulk ulushi (masalan: 1/2 qism).',
-    whereToFind: 'Meros ishi ochilgan notarial idoradan olinadi.',
-  ),
-  DocVocabulary(
-    term: 'Kadastr pasporti nima?',
-    simpleExplanation: 'Uyingizning texnik hujjati. Unda uyingiz necha xonadan iboratligi, devorlari qanday g‘ishtdan qurilgani, hovlingiz necha sotix ekani va xaritasi chizilgan bo‘ladi.',
-    whatIsInside: '• Uyning umumiy va yashash maydoni chizmasi;\n• Kommunikatsiya tarmoqlari borligi;\n• Qurilgan yil va texnik parametrlar.',
-    whereToFind: 'Kadastr filiali mutaxassislari tomonidan o‘lchab tuziladi va elektron shaklda beriladi.',
-  ),
-];
-
-// ---------------- BOSH SAHIFA ----------------
+// --- ASOSIY EKRAN ---
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final String currentLang;
+  final Function(String) onLanguageChanged;
+
+  const HomeScreen({
+    super.key,
+    required this.currentLang,
+    required this.onLanguageChanged,
+  });
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _selectedCategory = 'Barchasi';
   String _searchQuery = '';
-
-  final List<String> _categories = [
-    'Barchasi',
-    'Kadastr pasporti',
-    'Davlat ro‘yxati',
-    'Maʼlumotnoma',
-    'Yer uchastkasi',
-    'Auksion',
-    'Xususiylashtirish',
-    'Qonuniylashtirish',
-  ];
 
   @override
   Widget build(BuildContext context) {
-    final filtered = kadastrServices.where((s) {
-      final matchesCategory = _selectedCategory == 'Barchasi' || s.category == _selectedCategory;
-      final matchesSearch = s.titleSimple.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-          s.titleOfficial.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
+    final langData = appData[widget.currentLang]!;
+    final List<Map<String, dynamic>> allServices = langData['services'];
+
+    final filteredServices = allServices.where((s) {
+      final title = s['title'].toString().toLowerCase();
+      final cat = s['category'].toString().toLowerCase();
+      final q = _searchQuery.toLowerCase();
+      return title.contains(q) || cat.contains(q);
     }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D47A1),
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Oson Kadastr', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.menu_book, color: Colors.white),
-            tooltip: 'Hujjatlar nima? (Sodda qomus)',
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const VocabularyScreen()));
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.info_outline, color: Colors.white),
-            tooltip: 'Loyiha maqsadi va Aloqa',
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()));
-            },
-          )
-        ],
-      ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
+        backgroundColor: const Color(0xFF0F3973),
+        elevation: 2,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const UserAccountsDrawerHeader(
-              decoration: BoxDecoration(color: Color(0xFF0D47A1)),
-              accountName: Text('Oson Kadastr', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              accountEmail: Text('Korrupsiyaga qarshi huquqiy yo‘riqnoma'),
-              currentAccountPicture: CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Icon(Icons.shield, color: Color(0xFF0D47A1), size: 40),
+            Text(
+              langData['app_title'],
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 0.5,
+                color: Colors.white,
               ),
             ),
-            ListTile(
-              leading: const Icon(Icons.list_alt, color: Color(0xFF0D47A1)),
-              title: const Text('22 ta barcha davlat xizmati'),
-              subtitle: const Text('Amaldagi qonuniy meʼyorlar bilan'),
-              onTap: () => Navigator.pop(context),
-            ),
-            ListTile(
-              leading: const Icon(Icons.menu_book, color: Colors.indigo),
-              title: const Text('Hujjatlar nima? (Qomus)'),
-              subtitle: const Text('Qaror, APZ, ko‘chirma, shartnoma'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const VocabularyScreen()));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.support_agent, color: Colors.green),
-              title: const Text('Kadastr agentligi Call-markazi'),
-              subtitle: const Text('Ishonch telefoni: 1097'),
-              onTap: () {
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Kadastr agentligi ishonch telefoni: 1097')),
-                );
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.person, color: Colors.orange),
-              title: const Text('Dastur yaratuvchisi'),
-              subtitle: const Text('Muxriddin Elbegiyev (+998 33 911 22 22)'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()));
-              },
+            Text(
+              langData['app_subtitle'],
+              style: const TextStyle(
+                fontSize: 11,
+                color: Color(0xFFBAE6FD),
+              ),
             ),
           ],
         ),
-      ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Xizmat yoki hujjat nomini qidiring...',
-                prefixIcon: const Icon(Icons.search, color: Color(0xFF0D47A1)),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 0),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-              ),
-              onChanged: (val) => setState(() => _searchQuery = val),
-            ),
-          ),
-          Container(
-            width: double.infinity,
-            margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE8F5E9),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: const Color(0xFF81C784)),
-            ),
-            child: const Row(
-              children: [
-                Icon(Icons.shield, color: Color(0xFF2E7D32), size: 26),
-                SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'Har bir hujjat ustiga bosing — uning tavsifi, ichida nimalar yozilgan bo‘lishi va qaysi idoradan olinishi chiqadi!',
-                    style: TextStyle(color: Color(0xFF1B5E20), fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: Row(
-              children: _categories.map((cat) {
-                final isSelected = _selectedCategory == cat;
-                return Padding(
-                  padding: const EdgeInsets.only(right: 6),
-                  child: ChoiceChip(
-                    label: Text(cat, style: TextStyle(fontSize: 12, color: isSelected ? Colors.white : Colors.black87)),
-                    selected: isSelected,
-                    selectedColor: const Color(0xFF0D47A1),
-                    onSelected: (val) => setState(() => _selectedCategory = cat),
-                  ),
-                );
-              }).toList(),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: filtered.length,
-              itemBuilder: (context, i) {
-                final item = filtered[i];
-                return Card(
-                  elevation: 1.5,
-                  margin: const EdgeInsets.only(bottom: 10),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: const Color(0xFFE3F2FD),
-                      child: Text(item.id, style: const TextStyle(color: Color(0xFF0D47A1), fontWeight: FontWeight.bold)),
-                    ),
-                    title: Text(item.titleSimple, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const SizedBox(height: 2),
-                        Text(item.titleOfficial, style: TextStyle(fontSize: 11, color: Colors.grey.shade600, fontStyle: FontStyle.italic)),
-                        const SizedBox(height: 4),
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(4)),
-                              child: Text(item.category, style: const TextStyle(fontSize: 10, color: Color(0xFF0D47A1), fontWeight: FontWeight.bold)),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text('Muddati: ${item.duration}', overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: Colors.blueGrey)),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 14),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => DetailScreen(service: item)),
-                      );
-                    },
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------- ALOHIDA HUJJATLAR LUG‘ATI (QOMUS) EKRANI ----------------
-class VocabularyScreen extends StatelessWidget {
-  const VocabularyScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F9),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0D47A1),
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Hujjatlar nima? (Sodda qomus)', style: TextStyle(color: Colors.white, fontSize: 16)),
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: docVocabularies.length,
-        itemBuilder: (context, i) {
-          final item = docVocabularies[i];
-          return Card(
-            elevation: 2,
-            margin: const EdgeInsets.only(bottom: 14),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: ExpansionTile(
-              initiallyExpanded: i == 0,
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFFE3F2FD),
-                child: Icon(Icons.description, color: Color(0xFF0D47A1)),
-              ),
-              title: Text(item.term, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-              subtitle: const Text('Batafsil tushuntirishni ochish', style: TextStyle(fontSize: 11, color: Colors.grey)),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Divider(),
-                      const Text('Oddiy xalq tilida tushuntirish:', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-                      const SizedBox(height: 4),
-                      Text(item.simpleExplanation, style: const TextStyle(fontSize: 13, height: 1.3)),
-                      const SizedBox(height: 10),
-                      const Text('Bu hujjat ichida nimalar yozilgan bo‘lishi shart?', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0D47A1))),
-                      const SizedBox(height: 4),
-                      Text(item.whatIsInside, style: const TextStyle(fontSize: 12, height: 1.3, color: Colors.black87)),
-                      const SizedBox(height: 10),
-                      const Text('Agar yo‘qolgan bo‘lsa qayerdan topiladi?', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.orange)),
-                      const SizedBox(height: 4),
-                      Text(item.whereToFind, style: const TextStyle(fontSize: 12, height: 1.3)),
-                    ],
-                  ),
-                )
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// ---------------- TAFSILOTLAR EKRANI ----------------
-class DetailScreen extends StatelessWidget {
-  final KadastrService service;
-  const DetailScreen({super.key, required this.service});
-
-  void _showDocumentDetail(BuildContext context, RequiredDocument doc) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        padding: const EdgeInsets.all(20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                children: [
-                  const CircleAvatar(
-                    backgroundColor: Color(0xFFE8F5E9),
-                    child: Icon(Icons.find_in_page, color: Colors.green),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      doc.simpleName,
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                    ),
-                  ),
-                  IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(ctx)),
-                ],
-              ),
-              const Divider(height: 24),
-              const Text('Rasmiy davlat tilidagi nomi:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Colors.grey)),
-              Text(doc.officialName, style: const TextStyle(fontSize: 13, fontStyle: FontStyle.italic)),
-              const SizedBox(height: 14),
-              const Text('Bu qanday hujjat? (Oddiy tilda):', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0D47A1))),
-              const SizedBox(height: 4),
-              Text(doc.whatIsIt, style: const TextStyle(fontSize: 13, height: 1.35)),
-              const SizedBox(height: 14),
-              const Text('Hujjat ichida nimalar yozilgan bo‘lishi shart?', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.deepOrange)),
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.all(10),
-                decoration: BoxDecoration(color: const Color(0xFFFFF3E0), borderRadius: BorderRadius.circular(8)),
-                child: Text(doc.insideContent, style: const TextStyle(fontSize: 12, height: 1.35)),
-              ),
-              const SizedBox(height: 14),
-              const Text('Qayerdan olasiz yoki yo‘qolgan bo‘lsa nima qilasiz?', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green)),
-              const SizedBox(height: 4),
-              Text(doc.whereToGet, style: const TextStyle(fontSize: 13, height: 1.3)),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0D47A1), foregroundColor: Colors.white),
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Tushundim'),
-                ),
-              )
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0D47A1),
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(service.titleSimple, style: const TextStyle(color: Colors.white, fontSize: 15)),
-      ),
-      bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(12),
-        color: Colors.white,
-        child: ElevatedButton.icon(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF2E7D32),
-            foregroundColor: Colors.white,
-            padding: const EdgeInsets.symmetric(vertical: 14),
-          ),
-          icon: const Icon(Icons.check_circle_outline),
-          label: const Text('Hujjatlarim yetarlimi? Tekshirish', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (_) => CheckScreen(service: service)),
-            );
-          },
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(10)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Bu xizmat nima uchun kerak?', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0D47A1))),
-                const SizedBox(height: 6),
-                Text(service.purpose, style: const TextStyle(height: 1.3)),
-                const Divider(height: 20),
-                Text('Bitish muddati: ${service.duration}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                const SizedBox(height: 4),
-                Text('To‘lov: ${service.cost}', style: const TextStyle(color: Colors.black87)),
-              ],
-            ),
-          ),
-          const SizedBox(height: 12),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFFFF3E0),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.orange.shade300),
-            ),
-            child: Text(service.warningTip, style: const TextStyle(color: Color(0xFFBF360C), fontWeight: FontWeight.bold, fontSize: 13)),
-          ),
-          const SizedBox(height: 16),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text('Talab qilinadigan hujjatlar:', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-              Text('(Bosing va o‘qing)', style: TextStyle(fontSize: 11, color: Colors.blue.shade800, fontWeight: FontWeight.bold)),
-            ],
-          ),
-          const SizedBox(height: 8),
-          ...service.docs.map((d) => Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(10),
-              onTap: () => _showDocumentDetail(context, d),
-              child: Padding(
-                padding: const EdgeInsets.all(12),
+        actions: [
+          // Til tanlash tugmalari
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.language, color: Colors.white, size: 26),
+            onSelected: widget.onLanguageChanged,
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'uz_lat',
                 child: Row(
                   children: [
-                    const CircleAvatar(
-                      radius: 18,
-                      backgroundColor: Color(0xFFE3F2FD),
-                      child: Icon(Icons.info, color: Color(0xFF0D47A1), size: 20),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(d.simpleName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0D47A1))),
-                          const SizedBox(height: 2),
-                          Text('Qayerdan olinadi: ${d.whereToGet}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: Colors.grey)),
-                        ],
+                    Text(
+                      "O'zbekcha (Lotin)",
+                      style: TextStyle(
+                        fontWeight: widget.currentLang == 'uz_lat' ? FontWeight.bold : FontWeight.normal,
+                        color: widget.currentLang == 'uz_lat' ? const Color(0xFF0F3973) : Colors.black87,
                       ),
                     ),
-                    const Icon(Icons.touch_app, size: 18, color: Colors.blueGrey),
+                    if (widget.currentLang == 'uz_lat') const Spacer(),
+                    if (widget.currentLang == 'uz_lat') const Icon(Icons.check, color: Color(0xFF0F3973), size: 18),
                   ],
                 ),
               ),
-            ),
-          )),
-          const SizedBox(height: 14),
+              PopupMenuItem(
+                value: 'uz_cyr',
+                child: Row(
+                  children: [
+                    Text(
+                      "Ўзбекча (Крилл)",
+                      style: TextStyle(
+                        fontWeight: widget.currentLang == 'uz_cyr' ? FontWeight.bold : FontWeight.normal,
+                        color: widget.currentLang == 'uz_cyr' ? const Color(0xFF0F3973) : Colors.black87,
+                      ),
+                    ),
+                    if (widget.currentLang == 'uz_cyr') const Spacer(),
+                    if (widget.currentLang == 'uz_cyr') const Icon(Icons.check, color: Color(0xFF0F3973), size: 18),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'ru',
+                child: Row(
+                  children: [
+                    Text(
+                      "Русский",
+                      style: TextStyle(
+                        fontWeight: widget.currentLang == 'ru' ? FontWeight.bold : FontWeight.normal,
+                        color: widget.currentLang == 'ru' ? const Color(0xFF0F3973) : Colors.black87,
+                      ),
+                    ),
+                    if (widget.currentLang == 'ru') const Spacer(),
+                    if (widget.currentLang == 'ru') const Icon(Icons.check, color: Color(0xFF0F3973), size: 18),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(width: 8),
+        ],
+      ),
+      body: Column(
+        children: [
+          // Qidiruv paneli
           Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: const Color(0xFFFFEBEE), borderRadius: BorderRadius.circular(10)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Bularni talab qilishga HAQLARI YO‘Q:', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
-                const SizedBox(height: 6),
-                ...service.illegalDemands.map((il) => Text('• $il', style: const TextStyle(color: Color(0xFFB71C1C)))),
-              ],
+            padding: const EdgeInsets.all(14),
+            color: const Color(0xFF0F3973),
+            child: TextField(
+              onChanged: (val) {
+                setState(() {
+                  _searchQuery = val;
+                });
+              },
+              style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500),
+              decoration: InputDecoration(
+                hintText: langData['search_hint'],
+                hintStyle: const TextStyle(color: Colors.black54, fontSize: 14),
+                prefixIcon: const Icon(Icons.search, color: Color(0xFF0F3973), size: 24),
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
             ),
           ),
-        ],
-      ),
-    );
-  }
-}
 
-// ---------------- CHECKLIST EKRANI ----------------
-class CheckScreen extends StatefulWidget {
-  final KadastrService service;
-  const CheckScreen({super.key, required this.service});
-
-  @override
-  State<CheckScreen> createState() => _CheckScreenState();
-}
-
-class _CheckScreenState extends State<CheckScreen> {
-  late Map<int, bool> _checked;
-
-  @override
-  void initState() {
-    super.initState();
-    _checked = {for (int i = 0; i < widget.service.docs.length; i++) i: false};
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    int total = widget.service.docs.length;
-    int count = _checked.values.where((v) => v).length;
-    bool isComplete = total == count;
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFF7F9FC),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0D47A1),
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Hujjatlarim yetarlimi?', style: TextStyle(color: Colors.white, fontSize: 16)),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          const Text('Qo‘lingizda bor hujjatlarni belgilang:', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 10),
-          ...List.generate(widget.service.docs.length, (i) {
-            final doc = widget.service.docs[i];
-            final val = _checked[i] ?? false;
-            return Card(
-              margin: const EdgeInsets.only(bottom: 8),
-              child: CheckboxListTile(
-                value: val,
-                title: Text(doc.simpleName, style: const TextStyle(fontWeight: FontWeight.bold)),
-                subtitle: Text('Qayerdan: ${doc.whereToGet}'),
-                onChanged: (newVal) => setState(() => _checked[i] = newVal ?? false),
+          // Korrupsiyaga qarshi maxsus banner
+          InkWell(
+            onTap: () => _showAntiCorruptionInfo(context, langData),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFEF2F2),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFFCA5A5), width: 1.2),
               ),
-            );
-          }),
-          const SizedBox(height: 20),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: isComplete ? const Color(0xFFE8F5E9) : const Color(0xFFFFFDE7),
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: isComplete ? Colors.green : Colors.amber.shade700),
-            ),
-            child: Column(
-              children: [
-                Icon(isComplete ? Icons.check_circle : Icons.info, color: isComplete ? Colors.green : Colors.amber.shade900, size: 36),
-                const SizedBox(height: 8),
-                Text(
-                  isComplete ? 'Hujjatlaringiz to‘liq!' : 'Hujjatlar to‘liq emas ($count / $total)',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isComplete ? Colors.green.shade900 : Colors.amber.shade900),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  isComplete
-                      ? 'Endi bemalol Davlat xizmatlari markaziga borishingiz yoki my.gov.uz orqali ariza yuborishingiz mumkin. Hech kim sizdan ortiqcha qog‘oz talab qila olmaydi.'
-                      : 'Belgilanmagan hujjatlarni yuqorida ko‘rsatilgan joydan olib, keyin murojaat qiling.',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(fontSize: 13),
-                ),
-              ],
-            ),
-          )
-        ],
-      ),
-    );
-  }
-}
-
-// ---------------- LOYIHA MAQSADI VA ALOQA EKRANI ----------------
-class AboutScreen extends StatelessWidget {
-  const AboutScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF4F6F9),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0D47A1),
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Loyiha maqsadi va Aloqa', style: TextStyle(color: Colors.white, fontSize: 16)),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          // LOYIHANING RASMIY MAQSADI
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
                 children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
+                  const Icon(Icons.gavel_rounded, color: Color(0xFFDC2626), size: 34),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          langData['anti_corr_title'],
+                          style: const TextStyle(
+                            color: Color(0xFF991B1B),
+                            fontWeight: FontWeight.w800,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          langData['anti_corr_desc'],
+                          style: const TextStyle(
+                            color: Color(0xFF7F1D1D),
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios_rounded, color: Color(0xFFDC2626), size: 16),
+                ],
+              ),
+            ),
+          ),
+
+          // Xizmatlar ro'yxati
+          Expanded(
+            child: filteredServices.isEmpty
+                ? const Center(
+                    child: Text(
+                      'Hech narsa topilmadi',
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+                    itemCount: filteredServices.length,
+                    itemBuilder: (context, index) {
+                      final item = filteredServices[index];
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
                         decoration: BoxDecoration(
-                          color: Colors.red.shade50,
-                          borderRadius: BorderRadius.circular(10),
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.04),
+                              blurRadius: 8,
+                              offset: const Offset(0, 3),
+                            ),
+                          ],
                         ),
-                        child: const Icon(Icons.gavel, color: Colors.red, size: 28),
-                      ),
-                      const SizedBox(width: 12),
-                      const Expanded(
-                        child: Text(
-                          'Loyihaning rasmiy maqsadi',
-                          style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
+                        child: Material(
+                          color: Colors.transparent,
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ServiceDetailScreen(
+                                    service: item,
+                                    langData: langData,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Ikonka bloki
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFFE0F2FE),
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Icon(
+                                      item['icon'],
+                                      color: const Color(0xFF0284C7),
+                                      size: 30,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  // Matnlar
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFF1F5F9),
+                                            borderRadius: BorderRadius.circular(6),
+                                          ),
+                                          child: Text(
+                                            item['category'],
+                                            style: const TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: Color(0xFF475569),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          item['title'],
+                                          style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.w800,
+                                            color: Color(0xFF1E293B),
+                                            height: 1.25,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          item['desc'],
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            color: Color(0xFF64748B),
+                                            height: 1.3,
+                                          ),
+                                        ),
+                                        const SizedBox(height: 10),
+                                        Row(
+                                          children: [
+                                            const Icon(Icons.schedule, size: 16, color: Color(0xFF0F3973)),
+                                            const SizedBox(width: 4),
+                                            Text(
+                                              item['term'],
+                                              style: const TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.w700,
+                                                color: Color(0xFF0F3973),
+                                              ),
+                                            ),
+                                            const Spacer(),
+                                            Text(
+                                              langData['btn_details'],
+                                              style: const TextStyle(
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.w700,
+                                                color: Color(0xFF0284C7),
+                                              ),
+                                            ),
+                                            const Icon(Icons.chevron_right, size: 18, color: Color(0xFF0284C7)),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
-                  const Divider(height: 24),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8F5E9),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(color: const Color(0xFF81C784)),
-                    ),
-                    child: const Text(
-                      'Ushbu loyiha O‘zbekiston Respublikasi Kadastr agentligining Korrupsiyaga qarshi kurashish bo‘limi tashabbusi asosida ishlab chiqildi.',
-                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20), height: 1.3),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  const Text(
-                    'Asosiy vazifa va maqsad:',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 6),
-                  const Text(
-                    'Kadastr sohasida oddiy aholi va tadbirkorlarning eng ko‘p sarson bo‘lishi hamda noqonuniy talablarga duch kelishi — fuqarolarning o‘zida qanday hujjatlar borligini, qaysi hujjatlar yetishmasligini va yetishmayotgan hujjatlarni aynan qayerdan (Arxitektura, Qurilish, Notarius yoki Arxiv) olish kerakligini bilmasligidan kelib chiqadi.\n\n'
-                    'Natijada fuqarolar turli vositachilar (maklerlar)ning yolg‘on vaʼdalariga ishonib, korrupsiya tuzog‘iga tushib qolmoqda yoki asossiz xarajatlarga duchor bo‘lmoqda.\n\n'
-                    'Mazkur ilova fuqarolarga barcha 22 ta rasmiy davlat xizmati bo‘yicha aniq huquqiy yo‘riqnoma berish, ulardan asossiz hujjat talab qilinishiga yo‘l qo‘ymaslik hamda kadastr sohasida korrupsion xavflarga butunlay barham berish maqsadida xalqchil qo‘llanma sifatida yaratildi.',
-                    style: TextStyle(fontSize: 13, height: 1.45, color: Colors.black87),
-                  ),
-                ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showAntiCorruptionInfo(BuildContext context, Map<String, dynamic> langData) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            const Icon(Icons.security, color: Color(0xFFDC2626), size: 28),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                langData['anti_corr_dialog_title'],
+                style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
               ),
             ),
+          ],
+        ),
+        content: Text(
+          langData['anti_corr_dialog_body'],
+          style: const TextStyle(fontSize: 14, height: 1.4, color: Color(0xFF1E293B)),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('OK', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
           ),
+        ],
+      ),
+    );
+  }
+}
 
-          const SizedBox(height: 16),
+// --- XIZMAT TAFSILOTLARI EKRANI ---
+class ServiceDetailScreen extends StatelessWidget {
+  final Map<String, dynamic> service;
+  final Map<String, dynamic> langData;
 
-          // KADASTR AGENTLIGI CALL-MARKAZI (1097)
-          const Card(
-            elevation: 1.5,
-            child: ListTile(
-              leading: CircleAvatar(
-                backgroundColor: Color(0xFFE8F5E9),
-                child: Icon(Icons.support_agent, color: Colors.green),
-              ),
-              title: Text('Kadastr agentligi Call-markazi', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-              subtitle: Text('Rasmiy ishonch telefoni: 1097\n(Korrupsiya holatlari va kadastr xizmatlari yuzasidan rasmiy murojaatlar uchun)'),
-              isThreeLine: true,
+  const ServiceDetailScreen({
+    super.key,
+    required this.service,
+    required this.langData,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          service['category'],
+          style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17, color: Colors.white),
+        ),
+        backgroundColor: const Color(0xFF0F3973),
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE0F2FE),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(service['icon'], color: const Color(0xFF0284C7), size: 36),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Text(
+                    service['title'],
+                    style: const TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF0F172A),
+                      height: 1.25,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // DASTUR MUALLIFI VA ISHLAB CHIQUVCHI
-          Card(
-            elevation: 1.5,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                children: [
-                  const CircleAvatar(
-                    radius: 36,
-                    backgroundColor: Color(0xFF0D47A1),
-                    child: Icon(Icons.person, size: 40, color: Colors.white),
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Muxriddin Elbegiyev',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
-                  ),
-                  const SizedBox(height: 2),
-                  const Text(
-                    'Dastur yaratuvchisi va loyiha muallifi',
-                    style: TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  const Divider(height: 24),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const CircleAvatar(
-                      backgroundColor: Color(0xFFE8F5E9),
-                      child: Icon(Icons.phone, color: Colors.green),
+            const SizedBox(height: 20),
+            _infoCard(
+              title: 'Tavsif',
+              content: service['desc'],
+              icon: Icons.info_outline,
+            ),
+            const SizedBox(height: 12),
+            _infoCard(
+              title: langData['lbl_term'],
+              content: service['term'],
+              icon: Icons.timer_outlined,
+            ),
+            const SizedBox(height: 12),
+            _infoCard(
+              title: langData['lbl_cost'],
+              content: service['cost'],
+              icon: Icons.payments_outlined,
+            ),
+            const SizedBox(height: 12),
+            _infoCard(
+              title: langData['lbl_docs'],
+              content: service['docs'],
+              icon: Icons.folder_open_outlined,
+            ),
+            const SizedBox(height: 12),
+            _infoCard(
+              title: langData['lbl_rules'],
+              content: service['rules'],
+              icon: Icons.shield_outlined,
+              isHighlight: true,
+            ),
+            const SizedBox(height: 26),
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0F3973),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Yagona identifikatsiya (OneID) orqali ariza tizimiga ulanmoqda...'),
                     ),
-                    title: const Text('Telefon raqam', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                    subtitle: const Text(
-                      '+998 33 911 22 22',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.black87),
-                    ),
-                  ),
-                  ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const CircleAvatar(
-                      backgroundColor: Color(0xFFE1F5FE),
-                      child: Icon(Icons.send, color: Colors.lightBlue),
-                    ),
-                    title: const Text('Telegram aloqa', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                    subtitle: const Text(
-                      '+998 33 911 22 22',
-                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0D47A1)),
-                    ),
-                  ),
-                ],
+                  );
+                },
+                icon: const Icon(Icons.send_rounded, color: Colors.white),
+                label: Text(
+                  langData['btn_online_apply'],
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white),
+                ),
               ),
+            ),
+            const SizedBox(height: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _infoCard({
+    required String title,
+    required String content,
+    required IconData icon,
+    bool isHighlight = false,
+  }) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: isHighlight ? const Color(0xFFF0FDF4) : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isHighlight ? const Color(0xFF86EFAC) : const Color(0xFFE2E8F0),
+          width: 1.2,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 18, color: isHighlight ? const Color(0xFF16A34A) : const Color(0xFF0F3973)),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: isHighlight ? const Color(0xFF166534) : const Color(0xFF64748B),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            content,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              height: 1.35,
+              color: isHighlight ? const Color(0xFF14532D) : const Color(0xFF1E293B),
             ),
           ),
         ],
