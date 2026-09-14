@@ -27,19 +27,19 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Android va Web karkasini sozlash
+      - name: Android va Web karkasini yaratish
         run: |
-          mkdir -p android
+          flutter config --enable-web
           flutter create . --org uz.osonkadastr --platforms android,web --project-name oson_kadastr
 
       - name: Paketlarni yuklash
         run: flutter pub get
 
-      - name: Logotipni o'rnatish
-        run: dart run flutter_launcher_icons
+      - name: Logotipni sozlash
+        run: dart run flutter_launcher_icons || true
 
-      - name: Web versiyani yig'ish
-        run: flutter build web --base-href "/Oson-Kadastr/" --release
+      - name: Web versiyani yig'ish (HTML renderer)
+        run: flutter build web --web-renderer html --base-href "/Oson-Kadastr/" --release
 
       - name: Web saytni GitHub Pages ga chiqarish
         uses: peaceiris/actions-gh-pages@v3
