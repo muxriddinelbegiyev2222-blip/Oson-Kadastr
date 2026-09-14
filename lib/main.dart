@@ -128,7 +128,7 @@ final List<KadastrService> kadastrServices = [
     category: 'Maʼlumotnoma',
     purpose: 'Mulkka sud, MIB, bank yoki notarius tomonidan taqiq qo‘yilmaganligini aniqlash.',
     duration: '1 ish kuni (ko‘p hollarda real vaqtda avtomatik)',
-    cost: 'BHMning 0.05 baravari (my.gov.uz orqali chegirma bor)',
+    cost: 'BHMning 0.05 baravari (my.gov.uz orqali)',
     warningTip: 'Taqiq yoki xatlov bor obyektni sotish, hadya qilish yoki garovga qo‘yish qonunan mumkin emas.',
     docs: [
       RequiredDocument(
@@ -147,20 +147,20 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Mulkning o‘ziga tegishliligi haqida maʼlumotnoma',
     titleOfficial: 'Fuqaroning nomida ko‘chmas mulk bor/yo‘qligi haqida maʼlumotnoma',
     category: 'Maʼlumotnoma',
-    purpose: 'Fuqaroning butun O‘zbekiston hududida o‘z nomida turar joyi bor yoki yo‘qligini tasdiqlash (subsidiya, uy-joy navbati uchun kerak bo‘ladi).',
+    purpose: 'Fuqaroning butun O‘zbekiston hududida o‘z nomida turar joyi bor yoki yo‘qligini tasdiqlash (subsidiya va ipoteka navbati uchun).',
     duration: 'Avtomatik (1 kun ichida)',
     cost: 'BHMning 0.05 baravari',
-    warningTip: 'Ko‘pincha davlat subsidiyasi yoki ipoteka olishda talab etiladi.',
+    warningTip: 'Davlat subsidiyasi yoki imtiyozli ipoteka arizasida asosiy hujjat hisoblanadi.',
     docs: [
       RequiredDocument(
         simpleName: 'Pasport / ID karta maʼlumotlari',
         officialName: 'Shaxsiy JShSHIR',
         whereToGet: 'O‘zingizning shaxsingiz',
-        explanation: 'Tizim JShSHIR orqali barcha bazani o‘zi tekshiradi.',
+        explanation: 'Tizim JShSHIR orqali bazadan avtomatik aniqlaydi.',
       ),
     ],
     illegalDemands: [
-      'Turar joyi yo‘qligi haqida mahalladan tasdiqnoma so‘rash',
+      'Turar joyi yo‘qligi haqida mahalladan qog‘oz so‘rash',
     ],
   ),
   KadastrService(
@@ -168,26 +168,26 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Uyni (obyektni) ikkiga yoki undan ko‘p qismga bo‘lish',
     titleOfficial: 'Ko‘chmas mulk obyektini bo‘lish yoki birlashtirish bo‘yicha davlat xizmati',
     category: 'Uy-joy',
-    purpose: 'Bitta yer uchastkasi yoki uyni ikki mulkdor o‘rtasida mustaqil alohida obyektlarga ajratish.',
+    purpose: 'Bitta umumiy yer uchastkasi yoki uyni ikki mulkdor o‘rtasida alohida mustaqil obyektlarga ajratish.',
     duration: '10 dan 15 ish kunigacha',
     cost: 'Davlat boji stavkalari asosida',
-    warningTip: 'Bo‘linayotgan yangi obyektlar alohida kirish yo‘liga va minimal yer meʼyorlariga mos bo‘lishi lozim.',
+    warningTip: 'Bo‘linayotgan yangi obyektlar alohida kirish yo‘liga va belgilangan shaharsozlik meʼyorlariga mos bo‘lishi lozim.',
     docs: [
       RequiredDocument(
         simpleName: 'Mulkdorlarning o‘zaro notarial kelishuvi yoki sud qarori',
         officialName: 'Taqsimlash bitimi / Sud qarori',
         whereToGet: 'Notarius yoki sud orqali',
-        explanation: 'Uy qaysi qismdan qanday bo‘linganini ko‘rsatuvchi hujjat.',
+        explanation: 'Uy qaysi chegaradan qanday bo‘linganini tasdiqlovchi hujjat.',
       ),
       RequiredDocument(
-        simpleName: 'Asl kadastr hujjati',
+        simpleName: 'Mavjud kadastr hujjati',
         officialName: 'Obyekt kadastr yig‘majildi',
         whereToGet: 'Uy egasining qo‘lida bo‘ladi',
         explanation: 'Eski butun holatdagi kadastr.',
       ),
     ],
     illegalDemands: [
-      'Kommunal xizmatlarning yangi hisob raqamlari ochilganini oldindan talab qilish',
+      'Kommunal tarmoqlarning yangi shartnomalarini oldindan talab qilish',
     ],
   ),
   KadastrService(
@@ -195,41 +195,41 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Ipoteka va garov huquqini ro‘yxatdan o‘tkazish',
     titleOfficial: 'Ko‘chmas mulk ipotekasi va garov shartnomasini ro‘yxatga olish',
     category: 'Yer uchastkasi',
-    purpose: 'Bankdan kredit olishda uyni garovga qo‘yish yoki kredit yopilgach garovni yechish.',
+    purpose: 'Bankdan kredit olishda uyni garovga qo‘yish yoki to‘liq to‘langandan so‘ng garovni yechish.',
     duration: '1 ish kuni',
     cost: 'BHMning 50% miqdorida',
-    warningTip: 'Kredit to‘liq yopilgach, bankdan darhol xatlovni yechish arizasini topshirtiring.',
+    warningTip: 'Kredit to‘liq so‘ndirilgach, bank orqali taqiqni yechish arizasi berilishini unutmang.',
     docs: [
       RequiredDocument(
         simpleName: 'Garov yoki ipoteka shartnomasi',
         officialName: 'Notarial tasdiqlangan ipoteka shartnomasi',
         whereToGet: 'Bank va notariusdan',
-        explanation: 'Mulk kafolat sifatida olinganini tasdiqlovchi shartnoma.',
+        explanation: 'Mulk kafolat sifatida qo‘yilganligini tasdiqlovchi shartnoma.',
       ),
     ],
     illegalDemands: [
-      'Bank vakilining Davlat xizmatlari markaziga shaxsan borishi',
+      'Bank xodimining Davlat xizmatlari markaziga shaxsan borishi',
     ],
   ),
   KadastrService(
     id: '7',
     titleSimple: 'Tadbirkorlik uchun yer uchastkasini auksiondan olish',
-    titleOfficial: 'Yer uchastkalarini "E-auksion" orqali ijaraga yoki mulk qilib berish',
+    titleOfficial: 'Yer uchastkalarini "E-auksion" orqali mulk yoki ijara huquqi bilan berish',
     category: 'Yer uchastkasi',
-    purpose: 'Tadbirkorlik va biznes faoliyati uchun bo‘sh turgan yer maydonlarini auksion orqali shaffof xarid qilish.',
-    duration: 'Auksion muddatiga binoan (reglament asosida)',
-    cost: 'Auksiondagi yutuq bahosi bo‘yicha',
-    warningTip: 'Hokimning to‘g‘ridan-to‘g‘ri yer ajratish vakolati yo‘q! Faqat E-auksion orqali olinadi.',
+    purpose: 'Tadbirkorlik faoliyati uchun bo‘sh turgan yer maydonlarini elektron auksion orqali shaffof yutib olish.',
+    duration: 'Auksion reglamentiga asosan',
+    cost: 'Auksiondagi yutuq summasi',
+    warningTip: 'Hokimning to‘g‘ridan-to‘g‘ri yer ajratish vakolati bekor qilingan! Barcha yerlar faqat E-auksion orqali olinadi.',
     docs: [
       RequiredDocument(
         simpleName: 'Elektron raqamli imzo (ERI)',
         officialName: 'ERI kaliti',
-        whereToGet: 'Davlat xizmatlari markazidan yoki E-imzo orqali',
-        explanation: 'Auksionda qatnashish va bayonnomani tasdiqlash uchun kerak.',
+        whereToGet: 'DXM yoki E-imzo portali orqali',
+        explanation: 'Auksionda qatnashish va bayonnomani imzolash uchun kerak bo‘ladi.',
       ),
     ],
     illegalDemands: [
-      'Auksion yutug‘idan so‘ng hokim qarorini kutish yoki qo‘shimcha ruxsatnoma olish',
+      'Auksiondan so‘ng tuman hokimi qarorini talab qilish',
     ],
   ),
   KadastrService(
@@ -237,21 +237,21 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'O‘zboshimchalik bilan egallangan yer va binolarni qonuniylashtirish',
     titleOfficial: 'O‘zboshimchalik bilan egallangan yer uchastkalari hamda ularda qurilgan binolarga bo‘lgan huquqlarni eʼtirof etish',
     category: 'Qonuniylashtirish',
-    purpose: 'Yillar davomida hujjatsiz foydalanib kelingan uy-joylar va yer maydonlariga amaldagi amnistiya qonuni asosida huquqni rasmiylashtirish.',
-    duration: 'Bosqichma-bosqich xatlov grafigi asosida',
-    cost: 'Bir martalik belgilangan yig‘im stavkasi bo‘yicha',
-    warningTip: 'Ushbu xizmat bo‘yicha hech qanday vositachilarga pul bermang! Hududlar kadastr organlari tomonidan reja asosida dron va xatlov orqali bosqichma-bosqich ko‘rib chiqiladi.',
+    purpose: 'Yillar davomida hujjatsiz foydalanib kelingan uy-joylar va yer maydonlariga amaldagi qonun asosida huquqni eʼtirof etish.',
+    duration: 'Bosqichma-bosqich reja-grafik asosida',
+    cost: 'Qonunda belgilangan bir martalik to‘lov asosida',
+    warningTip: 'Hech qanday o‘rtakashlarga pul bermang! Hududlar kadastr organlari tomonidan bosqichma-bosqich, to‘liq xatlovdan o‘tkaziladi.',
     docs: [
       RequiredDocument(
-        simpleName: 'Yer yoki binodan uzoq vaqt foydalanilganini bildiruvchi eski dalillar',
-        officialName: 'Elektr, gaz to‘lov daftarlari, eski cheklar yoki soliq to‘lovlari',
-        whereToGet: 'Shaxsiy arxiv / kommunal to‘lov tizimlaridan',
-        explanation: 'Ushbu joyda ko‘p yillardan buyon yashab kelayotganingizni ko‘rsatuvchi to‘lovlar.',
+        simpleName: 'Yer va binodan ko‘p yillar foydalanilganini bildiruvchi to‘lovlar',
+        officialName: 'Kommunal to‘lovlar, kvitansiyalar yoki yer/mulk solig‘i cheklari',
+        whereToGet: 'Shaxsiy arxiv / to‘lov tizimlaridan',
+        explanation: 'Joydan uzoq muddat foydalanib kelayotganingizni tasdiqlovchi dalillar.',
       ),
     ],
     illegalDemands: [
-      'Oldindan noqonuniy "tezlashtirish" to‘lovlarini talab qilish',
-      'Noqonuniy komissiyalar tuzib pul yig‘ish',
+      'Tezlashtirish uchun qo‘shimcha noqonuniy to‘lov so‘rash',
+      'Mahalla yoki ko‘chada noqonuniy pul yig‘ish',
     ],
   ),
 ];
@@ -297,7 +297,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const UserAccountsDrawerHeader(
               decoration: BoxDecoration(color: Color(0xFF0D47A1)),
               accountName: Text('Oson Kadastr', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-              accountEmail: Text('Muallif: Muxriddin Elbegiyev'),
+              accountEmail: Text('Aholi uchun erkin huquqiy qo‘llanma'),
               currentAccountPicture: CircleAvatar(
                 backgroundColor: Colors.white,
                 child: Icon(Icons.home_work, color: Color(0xFF0D47A1), size: 40),
@@ -305,26 +305,28 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.home, color: Color(0xFF0D47A1)),
-              title: const Text('Barcha kadastr xizmatlari'),
-              subtitle: Text('${kadastrServices.length} ta asosiy yo‘nalish'),
+              title: const Text('Barcha xizmatlar ro‘yxati'),
+              subtitle: Text('${kadastrServices.length} ta asosiy davlat xizmati'),
               onTap: () => Navigator.pop(context),
             ),
+            // KADASTR AGENTLIGI ISHONCH TELEFONI
             ListTile(
-              leading: const Icon(Icons.phone_in_talk, color: Colors.green),
-              title: const Text('Kadastr ishonch telefoni: 1197'),
-              subtitle: const Text('Davlat Kadastr Palatasi call-markazi'),
+              leading: const Icon(Icons.support_agent, color: Colors.green),
+              title: const Text('Kadastr agentligi Call-markazi'),
+              subtitle: const Text('Ishonch telefoni: 1097'),
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Davlat Kadastr Palatasi: 1197')),
+                  const SnackBar(content: Text('Kadastr agentligi ishonch telefoni: 1097')),
                 );
               },
             ),
             const Divider(),
+            // DASTUR MUALLIFI BO'LIMI
             ListTile(
-              leading: const Icon(Icons.person, color: Colors.blueAccent),
-              title: const Text('Dastur muallifi bilan aloqa'),
-              subtitle: const Text('+998 33 911 22 22'),
+              leading: const Icon(Icons.person, color: Colors.orange),
+              title: const Text('Dastur yaratuvchisi'),
+              subtitle: const Text('Muxriddin Elbegiyev (+998 33 911 22 22)'),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(context, MaterialPageRoute(builder: (_) => const AboutScreen()));
@@ -429,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-// ---------------- DASTUR VA MUALLIF BILAN ALOQA EKRANI ----------------
+// ---------------- DASTUR YARATUVCHISI VA ALOQA EKRANI ----------------
 class AboutScreen extends StatelessWidget {
   const AboutScreen({super.key});
 
@@ -440,11 +442,12 @@ class AboutScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFF0D47A1),
         iconTheme: const IconThemeData(color: Colors.white),
-        title: const Text('Dastur haqida va Aloqa', style: TextStyle(color: Colors.white, fontSize: 17)),
+        title: const Text('Dastur yaratuvchisi va Aloqa', style: TextStyle(color: Colors.white, fontSize: 16)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          // DASTUR YARATUVCHISI KARTASI
           Card(
             elevation: 2,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -453,30 +456,30 @@ class AboutScreen extends StatelessWidget {
               child: Column(
                 children: [
                   const CircleAvatar(
-                    radius: 42,
+                    radius: 40,
                     backgroundColor: Color(0xFF0D47A1),
-                    child: Icon(Icons.person, size: 48, color: Colors.white),
+                    child: Icon(Icons.person, size: 44, color: Colors.white),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
                   const Text(
                     'Muxriddin Elbegiyev',
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
                   ),
                   const SizedBox(height: 4),
                   const Text(
-                    'Loyiha muallifi va ishlab chiquvchi',
+                    'Dastur yaratuvchisi va loyiha muallifi',
                     style: TextStyle(fontSize: 13, color: Colors.grey),
                   ),
-                  const Divider(height: 30),
+                  const Divider(height: 28),
 
-                  // TELEFON
+                  // TELEFON RAQAM
                   ListTile(
                     contentPadding: EdgeInsets.zero,
                     leading: const CircleAvatar(
                       backgroundColor: Color(0xFFE8F5E9),
                       child: Icon(Icons.phone, color: Colors.green),
                     ),
-                    title: const Text('Aloqa uchun telefon raqam', style: TextStyle(fontSize: 12, color: Colors.grey)),
+                    title: const Text('Telefon raqam', style: TextStyle(fontSize: 12, color: Colors.grey)),
                     subtitle: const Text(
                       '+998 33 911 22 22',
                       style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black87),
@@ -503,6 +506,23 @@ class AboutScreen extends StatelessWidget {
 
           const SizedBox(height: 16),
 
+          // RASMIY KADASTR AGENTLIGI ISHONCH TELEFONI KARTASI
+          Card(
+            elevation: 1.5,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+            child: ListTile(
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFFE8F5E9),
+                child: Icon(Icons.support_agent, color: Colors.green),
+              ),
+              title: const Text('Kadastr agentligi Call-markazi', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+              subtitle: const Text('Rasmiy ishonch telefoni: 1097\n(Kadastr masalalari bo‘yicha rasmiy murojaatlar uchun)'),
+              isThreeLine: true,
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
           // MAQSAD
           Card(
             elevation: 1.5,
@@ -521,7 +541,7 @@ class AboutScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 10),
                   Text(
-                    'Ushbu mobil ilova aholining (ayniqsa, chekka hududlardagi fuqarolarning) kadastr sohasidagi huquqiy savodxonligini oshirish, firibgarlik va noqonuniy talablardan himoya qilish hamda amaldagi barcha davlat xizmatlaridan ortiqcha xarajatsiz, oson foydalanishlariga ko‘maklashish maqsadida yaratilgan.',
+                    'Ushbu mobil ilova aholining kadastr sohasidagi huquqiy savodxonligini oshirish, firibgarlik va noqonuniy talablardan himoya qilish hamda amaldagi barcha davlat xizmatlaridan ortiqcha ovoragarchilik va xarajatsiz, oson foydalanishlariga ko‘maklashish maqsadida yaratilgan.',
                     style: TextStyle(fontSize: 13, height: 1.4, color: Colors.black87),
                   ),
                 ],
