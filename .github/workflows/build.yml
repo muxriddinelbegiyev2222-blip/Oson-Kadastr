@@ -1,9 +1,12 @@
-name: Build APK
+name: Build APK and Web
 
 on:
   push:
     branches: [ "main" ]
   workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -24,16 +27,25 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Android karkasini tiklash
+      - name: Android va Web karkasini sozlash
         run: |
           mkdir -p android
-          flutter create . --org uz.osonkadastr --platforms android --project-name oson_kadastr
+          flutter create . --org uz.osonkadastr --platforms android,web --project-name oson_kadastr
 
       - name: Paketlarni yuklash
         run: flutter pub get
 
       - name: Logotipni o'rnatish
         run: dart run flutter_launcher_icons
+
+      - name: Web versiyani yig'ish
+        run: flutter build web --base-href "/Oson-Kadastr/" --release
+
+      - name: Web saytni GitHub Pages ga chiqarish
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
 
       - name: APK yig'ish
         run: flutter build apk --release
