@@ -4,7 +4,6 @@ void main() {
   runApp(const OsonKadastrApp());
 }
 
-// ---------------- TIL HOLATI (STATE) ----------------
 enum AppLanguage { uzbekLatin, uzbekCyrillic, russian }
 
 class OsonKadastrApp extends StatefulWidget {
@@ -32,11 +31,11 @@ class _OsonKadastrAppState extends State<OsonKadastrApp> {
       title: 'Oson Kadastr',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF0B3C7B)),
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF08336E)),
         useMaterial3: true,
         fontFamily: 'Roboto',
       ),
-      home: HomeScreen(
+      home: CategorySelectionScreen(
         currentLanguage: currentLanguage,
         onLanguageChanged: changeLanguage,
       ),
@@ -44,7 +43,7 @@ class _OsonKadastrAppState extends State<OsonKadastrApp> {
   }
 }
 
-// ---------------- MULTILANGUAGE STRUKTURA ----------------
+// ---------------- TIL MODELLARI ----------------
 class MultiLangText {
   final String uz;
   final String kr;
@@ -65,12 +64,14 @@ class MultiLangText {
   }
 }
 
+// ---------------- HUJJAT VA ARXITEKTURA MODELI ----------------
 class RequiredDocument {
   final MultiLangText simpleName;
   final MultiLangText officialName;
   final MultiLangText whatIsIt;
   final MultiLangText insideContent;
   final MultiLangText whereToGet;
+  final MultiLangText arxitekturaBoglanishi; // Arxitektura va qurilishga aloqasi
 
   RequiredDocument({
     required this.simpleName,
@@ -78,6 +79,7 @@ class RequiredDocument {
     required this.whatIsIt,
     required this.insideContent,
     required this.whereToGet,
+    required this.arxitekturaBoglanishi,
   });
 }
 
@@ -86,7 +88,7 @@ class KadastrService {
   final IconData icon;
   final MultiLangText titleSimple;
   final MultiLangText titleOfficial;
-  final MultiLangText category;
+  final String categoryId;
   final MultiLangText purpose;
   final MultiLangText duration;
   final MultiLangText cost;
@@ -99,7 +101,7 @@ class KadastrService {
     required this.icon,
     required this.titleSimple,
     required this.titleOfficial,
-    required this.category,
+    required this.categoryId,
     required this.purpose,
     required this.duration,
     required this.cost,
@@ -109,27 +111,137 @@ class KadastrService {
   });
 }
 
-// ---------------- 22 TA MUKAMMAL KADASTR DAVLAT XIZMATLARI ----------------
-final List<KadastrService> allKadastrServices = [
-  // 1
+class ServiceCategory {
+  final String id;
+  final IconData icon;
+  final Color color;
+  final MultiLangText title;
+  final MultiLangText description;
+
+  ServiceCategory({
+    required this.id,
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.description,
+  });
+}
+
+// ---------------- 6 TA ASOSIY XIZMATLAR TOIFASI (TIPLARI) ----------------
+final List<ServiceCategory> serviceCategories = [
+  ServiceCategory(
+    id: 'turar',
+    icon: Icons.home,
+    color: const Color(0xFF0D47A1),
+    title: MultiLangText(
+      uz: 'Aholi turar joy xizmatlari',
+      kr: 'Аҳоли турар жой хизматлари',
+      ru: 'Жилая недвижимость граждан',
+    ),
+    description: MultiLangText(
+      uz: 'Kvartiralar, yakka tartibdagi hovli uylar, uy bo‘lish va manzil berish.',
+      kr: 'Квартиралар, якка тартибдаги ҳовли уйлар, уй бўлиш ва манзил бериш.',
+      ru: 'Квартиры, частные жилые дома, раздел жилья и присвоение адресов.',
+    ),
+  ),
+  ServiceCategory(
+    id: 'noturar',
+    icon: Icons.storefront,
+    color: const Color(0xFF00695C),
+    title: MultiLangText(
+      uz: 'Tadbirkorlik va noturar binolar',
+      kr: 'Тадбиркорлик ва нотурар бинолар',
+      ru: 'Коммерческая и нежилая недвижимость',
+    ),
+    description: MultiLangText(
+      uz: 'Do‘konlar, ofislar, ishlab chiqarish sexlari va ijara munosabatlari.',
+      kr: 'Дўконлар, офислар, ишлаб чиқариш цехлари ва ижара муносабатлари.',
+      ru: 'Магазины, офисы, склады, производство и долгосрочная аренда.',
+    ),
+  ),
+  ServiceCategory(
+    id: 'qonun937',
+    icon: Icons.verified,
+    color: const Color(0xFFE65100),
+    title: MultiLangText(
+      uz: 'O‘RQ-937 Qonuni (Amnistiya)',
+      kr: 'ЎРҚ-937 Қонуни (Амнистия)',
+      ru: 'Закон ЗРУ-937 (Амнистия жилья)',
+    ),
+    description: MultiLangText(
+      uz: 'Hujjatsiz uylar, o‘zboshimchalik bilan egallangan yerlarni qonuniylashtirish.',
+      kr: 'Ҳужжатсиз уйлар, ўзбошимчалик билан эгалланган ерларни қонунийлаштириш.',
+      ru: 'Признание прав на самовольно занятые участки и дома без документов.',
+    ),
+  ),
+  ServiceCategory(
+    id: 'qurilish',
+    icon: Icons.architecture,
+    color: const Color(0xFF4A148C),
+    title: MultiLangText(
+      uz: 'Yangi qurilish va Arxitektura',
+      kr: 'Янги қурилиш ва Архитектура',
+      ru: 'Новое строительство и Архитектура',
+    ),
+    description: MultiLangText(
+      uz: 'APZ olish, loyiha kelishuvi, rekonstruksiya va foydalanishga qabul (GASN).',
+      kr: 'АПЗ олиш, лойиҳа келишуви, реконструкция ва фойдаланишга қабул (ГАСН).',
+      ru: 'Получение АПЗ, согласование проектов, реконструкция и акт ввода (ГАСН).',
+    ),
+  ),
+  ServiceCategory(
+    id: 'yer',
+    icon: Icons.landscape,
+    color: const Color(0xFF2E7D32),
+    title: MultiLangText(
+      uz: 'Yer ajratish va E-auksion',
+      kr: 'Ер ажратиш ва Э-аукцион',
+      ru: 'Земельные участки и Аукцион',
+    ),
+    description: MultiLangText(
+      uz: 'E-auksion orqali yer olish, fermer xo‘jaligi ijarasi va servitut.',
+      kr: 'Э-аукцион орқали ер олиш, фермер хўжалиги ижараси ва сервитут.',
+      ru: 'Покупка земли на онлайн-аукционе, сельхозаренда и сервитут.',
+    ),
+  ),
+  ServiceCategory(
+    id: 'spravka',
+    icon: Icons.description,
+    color: const Color(0xFF37474F),
+    title: MultiLangText(
+      uz: 'Elektron maʼlumotnomalar (Reyestr)',
+      kr: 'Электрон маълумотномалар (Реестр)',
+      ru: 'Справки и выписки из реестра',
+    ),
+    description: MultiLangText(
+      uz: 'Mulk ko‘chirmasi (Vipiska), taqiq (zapret) va uy yo‘qligi spravkasi.',
+      kr: 'Мулк кўчирмаси (Виписка), тақиқ (запрет) ва уй йўқлиги справкаси.',
+      ru: 'Выписки с QR-кодом, проверка запретов/арестов и отсутствие жилья.',
+    ),
+  ),
+];
+
+// ---------------- BARCHA 22 TA XIZMAT (ARXITEKTURA VA HUQUQ TALQINI BILAN) ----------------
+final List<KadastrService> allServices = [
+  // 1. Turar joy pasporti
   KadastrService(
     id: '1',
     icon: Icons.home_work,
+    categoryId: 'turar',
     titleSimple: MultiLangText(
-      uz: 'Uy-joyga kadastr pasportini shakllantirish',
-      kr: 'Уй-жойга кадастр паспортини шакллантириш',
-      ru: 'Оформление кадастрового паспорта на жилье',
+      uz: 'Hovli uy va kvartiraga kadastr pasportini shakllantirish',
+      kr: 'Ҳовли уй ва квартирага кадастр паспортини шакллантириш',
+      ru: 'Оформление кадастрового паспорта на квартиру или жилой дом',
     ),
     titleOfficial: MultiLangText(
       uz: 'Turar joy obyektiga kadastr pasportini berish (VM 535-son qaror)',
       kr: 'Турар жой объектига кадастр паспортини бериш (ВМ 535-сон қарор)',
-      ru: 'Выдача кадастрового паспорта на жилой объект (ПКМ №535)',
+      ru: 'Выдача кадастрового паспорта на объект жилого фонда (ПКМ №535)',
     ),
-    category: MultiLangText(uz: 'Pasport', kr: 'Паспорт', ru: 'Паспорт'),
     purpose: MultiLangText(
-      uz: 'Kvartira yoki hovli uyning texnik parametrlarini o‘lchab, rasmiy elektron pasport va raqamli chizmasini tayyorlash.',
-      kr: 'Квартира ёки ҳовли уйнинг техник параметрларини ўлчаб, расмий электрон паспорт ва рақамли чизмасини тайёрлаш.',
-      ru: 'Замер технических параметров и подготовка электронного паспорта с чертежом квартиры или дома.',
+      uz: 'Uyning umumiy va yashash maydonini aniq o‘lchash, elektron chizmasini yaratish va davlat tizimiga kiritish.',
+      kr: 'Уйнинг умумий ва яшаш майдонини аниқ ўлчаш, электрон чизмасини яратиш ва давлат тизимига киритиш.',
+      ru: 'Техническая инвентаризация, замер жилой и общей площади, формирование электронного чертежа.',
     ),
     duration: MultiLangText(
       uz: 'Kvartira: 3 ish kuni; Hovli uy: 5 ish kuni',
@@ -137,234 +249,319 @@ final List<KadastrService> allKadastrServices = [
       ru: 'Квартира: 3 раб. дня; Частный дом: 5 раб. дней',
     ),
     cost: MultiLangText(
-      uz: 'Maydoniga qarab hisoblangan invoys bo‘yicha (my.gov.uz orqali 10% chegirma)',
-      kr: 'Майдонига қараб ҳисобланган инвойс бўйича (my.gov.uz орқали 10% чегирма)',
-      ru: 'По официальному инвойсу в зависимости от площади (10% скидка через my.gov.uz)',
+      uz: 'Maydoniga qarab tasdiqlangan invoys (my.gov.uz orqali 10% chegirma)',
+      kr: 'Майдонига қараб тасдиқланган инвойс (my.gov.uz орқали 10% чегирма)',
+      ru: 'По государственному инвойсу в зависимости от площади (10% скидка на my.gov.uz)',
     ),
     warningTip: MultiLangText(
-      uz: 'Qayta qurilgan xonalar bo‘lsa, arxitektura ruxsatnomasi talab qilinadi. Naqd pul bermang, to‘lov faqat elektron kvitansiya bilan!',
-      kr: 'Қайта қурилган хоналар бўлса, архитектура рухсатномаси талаб қилинади. Нақд пул берманг, фақат электрон квитанция билан тўланг!',
-      ru: 'При наличии перепланировки требуется разрешение архитекторов. Оплата только по официальной квитанции!',
+      uz: 'OGOH BO‘LING: Agar hovlingizda arxitektura ruxsatisiz yangi imorat qurilgan bo‘lsa, u kadastrda "o‘zboshimchalik" deb belgilanadi. Qo‘lda pul bermang!',
+      kr: 'ОГОҲ БЎЛИНГ: Агар ҳовлингизда архитектура рухсатисиз янги иморат қурилган бўлса, у кадастрда "ўзбошимчалик" деб белгиланади. Қўлда пул берманг!',
+      ru: 'ВНИМАНИЕ: При возведении построек без разрешения архитектуры они фиксируются как самовольные. Не давайте наличных денег!',
     ),
     docs: [
       RequiredDocument(
         simpleName: MultiLangText(
-          uz: 'Mulk huquqini tasdiqlovchi hujjat',
-          kr: 'Мулк ҳуқуқини тасдиқловчи ҳужжат',
-          ru: 'Правоустанавливающий документ на собственность',
+          uz: 'Mulk huquqini belgilovchi asosiy hujjat',
+          kr: 'Мулк ҳуқуқини белгиловчи асосий ҳужжат',
+          ru: 'Правоустанавливающий документ на жилье',
         ),
         officialName: MultiLangText(
-          uz: 'Oldi-sotdi, hadya bitimi, hokim qarori yoki meros guvohnomasi',
-          kr: 'Олди-сотди, ҳадя битими, ҳоким қарори ёки мерос гувоҳномаси',
-          ru: 'Договор купли-продажи, дарения, решение хокима или св-во о наследстве',
+          uz: 'Notarial oldi-sotdi/hadya shartnomasi, meros guvohnomasi yoki hokim qarori',
+          kr: 'Нотариал олди-сотди/ҳадя шартномаси, мерос гувоҳномаси ёки ҳоким қарори',
+          ru: 'Договор купли-продажи, дарения, свидетельство о праве на наследство или решение хокима',
         ),
         whatIsIt: MultiLangText(
-          uz: 'Mulkka qonuniy ega bo‘lganingizni tasdiqlovchi gerbli davlat hujjati.',
-          kr: 'Мулкка қонуний эга бўлганингизни тасдиқловчи гербли давлат ҳужжати.',
-          ru: 'Официальный документ с гербовой печатью, подтверждающий ваше право собственности.',
+          uz: 'Uy qonuniy ravishda sizga tegishli ekanini bildiruvchi eng muhim gerbli hujjat.',
+          kr: 'Уй қонуний равишда сизга тегишли эканини билдирувчи энг муҳим гербли ҳужжат.',
+          ru: 'Официальный гербовый документ, подтверждающий возникновение законного права собственности.',
         ),
         insideContent: MultiLangText(
-          uz: '• Notarius muhri va reyestr raqami;\n• Mulkdorning F.I.Sh. va aniq manzili.',
-          kr: '• Нотариус муҳри ва реестр рақами;\n• Мулкдорнинг Ф.И.Ш. ва аниқ манзили.',
-          ru: '• Печать нотариуса и номер реестра;\n• Ф.И.О. владельца и точный адрес.',
+          uz: '• Notarius muhri, bitim sanasi va reyestr raqami;\n• Mulkdorning F.I.Sh. va aniq pasport maʼlumotlari;\n• Mulkning to‘liq manzili.',
+          kr: '• Нотариус муҳри, битим санаси ва реестр рақами;\n• Мулкдорнинг Ф.И.Ш. ва аниқ паспорт маълумотлари;\n• Мулкнинг тўлиқ манзили.',
+          ru: '• Гербовая печать нотариуса, дата и номер реестра;\n• Ф.И.О. собственника и адрес объекта.',
         ),
         whereToGet: MultiLangText(
-          uz: 'Notarial idoradan, hokimlik devonxonasidan yoki davlat arxividan.',
-          kr: 'Нотариал идорадан, ҳокимлик девонхонасидан ёки давлат архивидан.',
-          ru: 'В нотариальной конторе, канцелярии хокимията или госархиве.',
+          uz: 'Notarial idoradan, hokimiyat arxividan yoki viloyat davlat arxividan.',
+          kr: 'Нотариал идорадан, ҳокимият архивидан ёки вилоят давлат архивидан.',
+          ru: 'В нотариальной конторе оформления или областном государственном архиве.',
+        ),
+        arxitekturaBoglanishi: MultiLangText(
+          uz: 'Mavjud uyni qayta pasportlashtirishda arxitektura talab etilmaydi. Faqat bino devorlari surilgan yoki yangi xona qo‘shilgan bo‘lsa, arxitektura xulosasi kerak bo‘ladi.',
+          kr: 'Мавжуд уйни қайта паспортлаштиришда архитектура талаб этилмайди. Фақат бино деворлари сурилган бўлса, архитектура хулосаси керак.',
+          ru: 'Для планового переоформления архитектура не требуется. Нужна только в случае пристроек или переноса капитальных стен.',
         ),
       ),
       RequiredDocument(
         simpleName: MultiLangText(
-          uz: 'Shaxsni tasdiqlovchi hujjat',
-          kr: 'Шахсни тасдиқловчи ҳужжат',
-          ru: 'Документ, удостоверяющий личность',
+          uz: 'Pasport / ID-karta (JShSHIR)',
+          kr: 'Паспорт / ID-карта (ЖШШИР)',
+          ru: 'Паспорт / ID-карта с ПИНФЛ',
         ),
         officialName: MultiLangText(
-          uz: 'Pasport yoki identifikatsiya ID-kartasi (JShSHIR)',
-          kr: 'Паспорт ёки идентификация ID-картаси (ЖШШИР)',
-          ru: 'Паспорт или идентификационная ID-карта (ПИНФЛ)',
+          uz: 'Shaxsni tasdiqlovchi hujjat',
+          kr: 'Шахсни тасдиқловчи ҳужжат',
+          ru: 'Документ, удостоверяющий личность заявителя',
         ),
         whatIsIt: MultiLangText(
-          uz: '14 xonali JShSHIR raqamingiz ko‘rsatilgan shaxsiy kartangiz.',
-          kr: '14 хонали ЖШШИР рақамингиз кўрсатилган шахсий картангиз.',
+          uz: '14 xonali unikal JShSHIR raqamingiz ko‘rsatilgan karta.',
+          kr: '14 хонали уникал ЖШШИР рақамингиз кўрсатилган карта.',
           ru: 'Удостоверение личности с 14-значным персональным номером ПИНФЛ.',
         ),
         insideContent: MultiLangText(
-          uz: '• F.I.Sh., fotosurat va JShSHIR kodi.',
-          kr: '• Ф.И.Ш., фотосурат ва ЖШШИР коди.',
-          ru: '• Ф.И.О., фотография и код ПИНФЛ.',
+          uz: '• F.I.Sh., rasm va 14 xonali JShSHIR raqami.',
+          kr: '• Ф.И.Ш., расм ва 14 хонали ЖШШИР рақами.',
+          ru: '• Ф.И.О., фотография и персональный ПИНФЛ.',
         ),
         whereToGet: MultiLangText(
-          uz: 'Yoningizda bo‘lishi kifoya, nusxa qoldirish talab etilmaydi.',
-          kr: 'Ёнингизда бўлиши кифоя, нусха қолдириш талаб этилмайди.',
-          ru: 'Достаточно иметь оригинал при себе, копию сдавать не нужно.',
+          uz: 'Yoningizda bo‘lishi kifoya, qog‘oz nusxa berish shart emas.',
+          kr: 'Ёнингизда бўлиши кифоя, қоғоз нусха бериш шарт эмас.',
+          ru: 'Оригинал при себе. Бумажные копии сдавать запрещено.',
+        ),
+        arxitekturaBoglanishi: MultiLangText(
+          uz: 'Aloqasi yo‘q.',
+          kr: 'Алоқаси йўқ.',
+          ru: 'Не связано.',
         ),
       ),
     ],
     illegalDemands: [
       MultiLangText(uz: 'Mahalladan maʼlumotnoma', kr: 'Маҳалладан маълумотнома', ru: 'Справка с махалли'),
-      MultiLangText(uz: 'Qo‘shnilar tilxati', kr: 'Қўшнилар тилхати', ru: 'Расписка от соседей'),
-      MultiLangText(uz: 'Kommunal to‘lov cheklari', kr: 'Коммунал тўлов чеклари', ru: 'Чеки коммунальных служб'),
+      MultiLangText(uz: 'Qo‘shnilar rozilik tilxati', kr: 'Қўшнилар розилик тилхати', ru: 'Расписка от соседей'),
+      MultiLangText(uz: 'Kommunal to‘lov qarz yo‘qligi cheklari', kr: 'Коммунал тўлов қарз йўқлиги чеклари', ru: 'Чеки коммунальных служб'),
     ],
   ),
 
-  // 2
+  // 2. Yangi qurilish va rekonstruksiya (Arxitektura o‘rni)
   KadastrService(
     id: '2',
-    icon: Icons.storefront,
+    icon: Icons.architecture,
+    categoryId: 'qurilish',
     titleSimple: MultiLangText(
-      uz: 'Tadbirkorlik va noturar binolarga kadastr pasporti olish',
-      kr: 'Тадбиркорлик ва нотурар биноларга кадастр паспорти олиш',
-      ru: 'Кадастровый паспорт на нежилое коммерческое здание',
+      uz: 'Yangi qurilgan uyni foydalanishga qabul qilish va pasport berish',
+      kr: 'Янги қурилган уйни фойдаланишга қабул қилиш ва паспорт бериш',
+      ru: 'Ввод нового дома в эксплуатацию и первичный кадастр',
     ),
     titleOfficial: MultiLangText(
-      uz: 'Ko‘chmas mulk obyektiga (noturar bino) kadastr pasportini berish',
-      kr: 'Кўчмас мулк объектига (нотурар бино) кадастр паспортини бериш',
-      ru: 'Выдача кадастрового паспорта на нежилое здание',
+      uz: 'Qurilishi tugallangan bino va inshootlarni foydalanishga qabul qilish va davlat ro‘yxatidan o‘tkazish',
+      kr: 'Қурилиши тугалланган бино ва иншоотларни фойдаланишга қабул қилиш ва рўйхатдан ўтказиш',
+      ru: 'Приемка завершенного строительством объекта в эксплуатацию и госрегистрация',
     ),
-    category: MultiLangText(uz: 'Pasport', kr: 'Паспорт', ru: 'Паспорт'),
     purpose: MultiLangText(
-      uz: 'Do‘kon, ofis, savdo shoxobchasi yoki sex kabi noturar obyektlarning kadastr pasportini tayyorlash.',
-      kr: 'Дўкон, офис, савдо шохобчаси ёки цех каби нотурар объектларнинг кадастр паспортини тайёрлаш.',
-      ru: 'Оформление кадастрового паспорта на коммерческие магазины, офисы и склады.',
+      uz: 'Bo‘sh yerda yangi ko‘tarilgan bino yoki kapital qayta qurilgan imoratni qonuniy deb tan olish.',
+      kr: 'Бўш ерда янги кўтарилган бино ёки капитал қайта қурилган иморатни қонуний деб тан олиш.',
+      ru: 'Официальный ввод новостройки в эксплуатацию и присвоение первичного кадастрового номера.',
     ),
-    duration: MultiLangText(
-      uz: '100 kv.m gacha — 5 ish kuni; 1000 kv.m gacha — 7 ish kuni',
-      kr: '100 кв.м гача — 5 иш куни; 1000 кв.м гача — 7 иш куни',
-      ru: 'До 100 кв.м — 5 раб. дней; До 1000 кв.м — 7 раб. дней',
-    ),
-    cost: MultiLangText(
-      uz: 'Tasdiqlangan davlat tarifi bo‘yicha elektron invoys',
-      kr: 'Тасдиқланган давлат тарифи бўйича электрон инвойс',
-      ru: 'По государственному тарифу через электронный инвойс',
-    ),
+    duration: MultiLangText(uz: '7–10 ish kuni', kr: '7–10 иш куни', ru: '7–10 раб. дней'),
+    cost: MultiLangText(uz: 'Tasdiqlangan invoys bo‘yicha', kr: 'Тасдиқланган инвойс бўйича', ru: 'По официальному инвойсу'),
     warningTip: MultiLangText(
-      uz: 'Yangi qurilgan tijorat binosi bo‘lsa, Shaharsozlik inspeksiyasi (GASN) qabul xulosasi talab etiladi.',
-      kr: 'Янги қурилган тижорат биноси бўлса, Шаҳарсозлик инспекцияси (ГАСН) қабул хулосаси талаб этилади.',
-      ru: 'Для новых зданий обязателен акт ввода в эксплуатацию от строительной инспекции (ГАСН).',
+      uz: 'DIQQAT: APZ (ruxsatnoma) olmasdan turib uy qurgan bo‘lsangiz, qurilish inspeksiyasi jarima qo‘llashi mumkin. Avval tuman arxitekturasidan kelishuv olinishi shart!',
+      kr: 'ДИҚҚАТ: АПЗ (рухсатнома) олмасдан туриб уй қурган бўлсангиз, қурилиш инспекцияси жарима қўллаши мумкин. Аввал архитектурадан келишув олиниши шарт!',
+      ru: 'ВНИМАНИЕ: Строительство без АПЗ влечет штрафы инспекции. Проект должен быть первично согласован с архитектурой!',
     ),
     docs: [
       RequiredDocument(
         simpleName: MultiLangText(
-          uz: 'Mulk huquqi yoki auksion hujjati',
-          kr: 'Мулк ҳуқуқи ёки аукцион ҳужжати',
-          ru: 'Документ о праве собственности или протокол аукциона',
+          uz: 'APZ — Arxitektura-rejalashtirish topshirig‘i',
+          kr: 'АПЗ — Архитектура-режалаштириш топшириғи',
+          ru: 'АПЗ — Архитектурно-планировочное задание',
         ),
         officialName: MultiLangText(
-          uz: 'Oldi-sotdi shartnomasi / E-auksion yutuq bayonnomasi',
-          kr: 'Олди-соти шартномаси / Э-аукцион ютуқ баённомаси',
-          ru: 'Договор купли-продажи / Протокол победы на E-auksion',
+          uz: 'Tuman qurilish va arxitektura bo‘limi tomonidan berilgan APZ hujjati',
+          kr: 'Туман қурилиш ва архитектура бўлими томонидан берилган АПЗ ҳужжати',
+          ru: 'Архитектурно-планировочное задание отдела строительства и архитектуры',
         ),
         whatIsIt: MultiLangText(
-          uz: 'Binoni qonuniy sotib olganingizni tasdiqlovchi hujjat.',
-          kr: 'Бинони қонуний сотиб олганингизни тасдиқловчи ҳужжат.',
-          ru: 'Официальный протокол или договор, удостоверяющий покупку здания.',
+          uz: 'Qurilish boshlanishidan oldin beriladigan ruxsatnoma. Unda uy necha qavat bo‘lishi va ko‘chadan necha metr ichkarida qurilishi yoziladi.',
+          kr: 'Қурилиш бошланишидан олдин бериладиган рухсатнома. Унда уй неча қават бўлиши ва кўчадан неча метр ичкарида қурилиши ёзилади.',
+          ru: 'Базовый градостроительный документ, определяющий этажность, пятно застройки и красные линии.',
         ),
         insideContent: MultiLangText(
-          uz: '• Faoliyat turi va chegaralari.',
-          kr: '• Фаолият тури ва чегаралари.',
-          ru: '• Назначение объекта и границы площади.',
+          uz: '• Qizil chiziq chegaralari;\n• Qavatlar soni va balandlik chegarasi;\n• Muhandislik tarmoqlariga (svet, gaz, suv) ulanish shartlari.',
+          kr: '• Қизил чизиқ чегаралари;\n• Қаватлар сони ва баландлик чегараси;\n• Муҳандислик тармоқларига уланиш шартлари.',
+          ru: '• Красные линии и отступы;\n• Предельная этажность и высотность;\n• Техусловия подключения инженерных сетей.',
         ),
         whereToGet: MultiLangText(
-          uz: 'E-auksion tizimidan yoki notariusdan.',
-          kr: 'Э-аукцион тизимидан ёки нотариусдан.',
-          ru: 'В кабинете E-auksion или у нотариуса.',
+          uz: 'my.gov.uz orqali yoki DXM orqali tuman Arxitektura va qurilish bo‘limidan olinadi.',
+          kr: 'my.gov.uz орқали ёки ДХМ орқали туман Архитектура ва қурилиш бўлимидан олинади.',
+          ru: 'Через портал my.gov.uz или в Центре госуслуг из районного отдела архитектуры.',
+        ),
+        arxitekturaBoglanishi: MultiLangText(
+          uz: 'Bu aynan Qurilish va arxitektura vazirligi tizimining eng asosiy poydevor hujjatidir.',
+          kr: 'Бу айнан Қурилиш ва архитектура вазирлиги тизимининг энг асосий пойдевор ҳужжатидир.',
+          ru: 'Является ключевым документом органов градостроительства до начала стройки.',
+        ),
+      ),
+      RequiredDocument(
+        simpleName: MultiLangText(
+          uz: 'Litsenziyali loyiha (Arxitektura chizmasi)',
+          kr: 'Лицензияли лойиҳа (Архитектура чизмаси)',
+          ru: 'Согласованный проект проектной организации',
+        ),
+        officialName: MultiLangText(
+          uz: 'Litsenziyaga ega tashkilot tomonidan ishlab chiqilgan va kelishilgan loyiha',
+          kr: 'Лицензияга эга ташкилот томонидан ишлаб чиқилган ва келишилган лойиҳа',
+          ru: 'Проектная документация, разработанная лицензированной организацией',
+        ),
+        whatIsIt: MultiLangText(
+          uz: 'Uyingiz mustahkamligi, poydevori va seysmik xavfsizligi hisoblangan professional loyiha chizmasi.',
+          kr: 'Уйингиз мустаҳкамлиги, пойдевори ва сейсмик хавфсизлиги ҳисобланган профессионал лойиҳа чизмаси.',
+          ru: 'Архитектурно-строительный чертеж с расчетом сейсмостойкости и несущих конструкций.',
+        ),
+        insideContent: MultiLangText(
+          uz: '• Loyiha tashkiloti muhri va litsenziya raqami;\n• Bino qavatlari, devorlari va xonalar o‘lchami.',
+          kr: '• Лойиҳа ташкилоти муҳри ва лицензия рақами;\n• Бино қаватлари, деворлари ва хоналар ўлчами.',
+          ru: '• Печать проектной организации и номер лицензии;\n• Экспликация помещений и разрезы здания.',
+        ),
+        whereToGet: MultiLangText(
+          uz: 'Loyiha institutlari yoki xususiy litsenziyali arxitektorlardan buyurtma qilinadi.',
+          kr: 'Лойиҳа институтлари ёки хусусий лицензияли архитекторлардан буюртма қилинади.',
+          ru: 'Заказывается у частных лицензированных проектных организаций или институтов.',
+        ),
+        arxitekturaBoglanishi: MultiLangText(
+          uz: 'Loyiha tuman arxitektura bo‘limining shaharsozlik kengashida tasdiqlanadi.',
+          kr: 'Лойиҳа туман архитектура бўлимининг шаҳарсозлик кенгашида тасдиқланади.',
+          ru: 'Подлежит экспертизе и согласованию в градостроительном совете архитектуры.',
+        ),
+      ),
+      RequiredDocument(
+        simpleName: MultiLangText(
+          uz: 'GASN ruxsatnomasi (Qurilish inspeksiyasi)',
+          kr: 'ГАСН рухсатномаси (Қурилиш инспекцияси)',
+          ru: 'Разрешение и акт инспекции контроля в сфере строительства',
+        ),
+        officialName: MultiLangText(
+          uz: 'Qurilish-montaj ishlarini boshlash haqida xabarnoma va foydalanishga qabul dalolatnomasi',
+          kr: 'Қурилиш-монтаж ишларини бошлаш ҳақида хабарнома ва қабул далолатномаси',
+          ru: 'Уведомление о начале СМР и акт приемки объекта в эксплуатацию',
+        ),
+        whatIsIt: MultiLangText(
+          uz: 'Davlat qurilish nazorati inspektori imorat xavfsiz qurilganini tekshirib beradigan elektron xulosa.',
+          kr: 'Давлат қурилиш назорати инспектори иморат хавфсиз қурилганини текшириб берадиган электрон хулоса.',
+          ru: 'Электронный акт госинспектора о соответствии построенного объекта нормам безопасности.',
+        ),
+        insideContent: MultiLangText(
+          uz: '• Qabul komissiyasi aʼzolarining QR-kodli elektron imzolari.',
+          kr: '• Қабул комиссияси аъзоларининг QR-кодли электрон имзолари.',
+          ru: '• QR-код и электронные подписи инспекторов технадзора.',
+        ),
+        whereToGet: MultiLangText(
+          uz: 'Qurilish vazirligi hududiy nazorat inspeksiyasidan (DXM orqali).',
+          kr: 'Қурилиш вазирлиги ҳудудий назорат инспекциясидан (ДХМ орқали).',
+          ru: 'В территориальной инспекции Минстроя через Центр госуслуг.',
+        ),
+        arxitekturaBoglanishi: MultiLangText(
+          uz: 'Qurilish inspeksiyasi obyekti qabul qilgandan keyingina kadastr organi uni ro‘yxatga oladi.',
+          kr: 'Қурилиш инспекцияси объекти қабул қилгандан кейингина кадастр органи уни рўйхатга олади.',
+          ru: 'Кадастр оформляет паспорт только на основании положительного акта инспекции.',
         ),
       ),
     ],
     illegalDemands: [
-      MultiLangText(uz: 'Soliqdan qarz yo‘qligi maʼlumotnomasi', kr: 'Солиқдан қарз йўқлиги маълумотномаси', ru: 'Справка об отсутствии задолженности по налогам'),
+      MultiLangText(uz: 'Komissiya aʼzolarining uyga norasmiy kelishi uchun pul', kr: 'Комиссия аъзоларининг уйга норасмий келиши учун пул', ru: 'Оплата неофициальных выездов инспекторов'),
     ],
   ),
 
-  // 3
+  // 3. O‘RQ-937 QONUNI BO‘YICHA AMNISTIYA (KENG TALQIN)
   KadastrService(
     id: '3',
-    icon: Icons.verified_user,
+    icon: Icons.verified,
+    categoryId: 'qonun937',
     titleSimple: MultiLangText(
-      uz: 'Mulk huquqini davlat ro‘yxatidan o‘tkazish (Reyestr)',
-      kr: 'Мулк ҳуқуқини давлат рўйхатидан ўтказиш (Реестр)',
-      ru: 'Государственная регистрация прав на недвижимость',
+      uz: 'O‘RQ-937 Qonuni: Hujjatsiz yer va uylarni eʼtirof etish (Amnistiya)',
+      kr: 'ЎРҚ-937 Қонуни: Ҳужжатсиз ер ва уйларни эътироф этиш (Амнистия)',
+      ru: 'Закон ЗРУ-937: Признание прав на самовольное жилье и участки (Амнистия)',
     ),
     titleOfficial: MultiLangText(
-      uz: 'Ko‘chmas mulkka bo‘lgan huquqlarni davlat ro‘yxatidan o‘tkazish',
-      kr: 'Кўчмас мулкка бўлган ҳуқуқларни давлат рўйхатидан ўтказиш',
-      ru: 'Госрегистрация прав на недвижимое имущество в реестре',
+      uz: 'O‘zboshimchalik bilan egallangan yer uchastkalari hamda ularda qurilgan binolar va inshootlarga bo‘lgan huquqlarni eʼtirof etish to‘g‘risidagi Qonun (05.08.2024 yildagi O‘RQ-937-son)',
+      kr: 'Ўзбошимчалик билан эгалланган ер участкалари ҳамда биноларга бўлган ҳуқуқларни эътироф этиш тўғрисидаги Қонун',
+      ru: 'Закон ЗРУ-937 от 05.08.2024 "О признании прав на самовольно занятые земельные участки и постройки"',
     ),
-    category: MultiLangText(uz: 'Ro‘yxat', kr: 'Рўйхат', ru: 'Реестр'),
     purpose: MultiLangText(
-      uz: 'Notariusda uy sotib olingandan so‘ng, mulkdorni davlat bazasiga qonuniy ega sifatida kiritish.',
-      kr: 'Нотариусда уй сотиб олингандан сўнг, мулкдорни давлат базасига қонуний эга сифатида киритиш.',
-      ru: 'Внесение владельца в Единый госреестр после нотариального оформления.',
+      uz: '2018-yil 1-mayga qadar fuqarolar tomonidan hujjatsiz qurilgan yakka tartibdagi uy-joylarga, ortiqcha egallangan yerlarga rasmiy mulk huquqini berish.',
+      kr: '2018 йил 1 майга қадар ҳужжатсиз қурилган якка тартибдаги уй-жойларга, ортиқча эгалланган ерларга расмий мулк ҳуқуқини бериш.',
+      ru: 'Признание права собственности на жилые дома, возведенные гражданами без документов до 1 мая 2018 года, и излишки земли.',
     ),
-    duration: MultiLangText(uz: '2 ish kuni', kr: '2 иш куни', ru: '2 раб. дня'),
-    cost: MultiLangText(uz: 'BHMning 1 dan 1.25 baravarigacha', kr: 'БҲМнинг 1 дан 1.25 бараваригача', ru: 'От 1 до 1.25 БРВ'),
+    duration: MultiLangText(
+      uz: 'Tuman ishchi guruhining hududiy xatlov reja-jadvali asosida',
+      kr: 'Туман ишчи гуруҳининг ҳудудий хатлов режа-жадвали асосида',
+      ru: 'По утвержденному графику сплошной инвентаризации рабочей группы района',
+    ),
+    cost: MultiLangText(
+      uz: 'Qonunda belgilangan bir martalik to‘lov (Toshkentda 5 BHM, viloyatlarda 3 BHM, qishloqlarda 1 BHM)',
+      kr: 'Қонунда белгиланган бир марталик тўлов (Тошкентда 5 БҲМ, вилоятларда 3 БҲМ, қишлоқларда 1 БҲМ)',
+      ru: 'Разовый законный сбор (г. Ташкент — 5 БРВ, областные центры — 3 БРВ, села — 1 БРВ)',
+    ),
     warningTip: MultiLangText(
-      uz: 'Bitimdan so‘ng 1 oy ichida ro‘yxatdan o‘tkazilmasa, maʼmuriy jarima solinadi!',
-      kr: 'Битимдан сўнг 1 ой ичида рўйхатдан ўтказилмаса, маъмурий жарима солинади!',
-      ru: 'При пропуске месячного срока регистрации налагается административный штраф!',
+      uz: 'OGOH BO‘LING: Amnistiya bo‘yicha hech qanday arizalar qabul qilinmaydi! Jarayon mahalla-mahalla kadastr va arxitektura xodimlari tomonidan BEPUL xatlov qilinadi. Vositachilarga bitta ham so‘m bermang!',
+      kr: 'ОГОҲ БЎЛИНГ: Амнистия бўйича ариза топширилмайди! Жараён маҳаллама-маҳалла БЕПУЛ хатлов қилинади. Воситачиларга умуман пул берманг!',
+      ru: 'ВАЖНО: Индивидуальные заявления не подаются! Сплошная инвентаризация по махаллям проводится БЕСПЛАТНО. Не платите маклерам ни сума!',
     ),
     docs: [
       RequiredDocument(
         simpleName: MultiLangText(
-          uz: 'Notarial bitim yoki sud qarori',
-          kr: 'Нотариал битим ёки суд қарори',
-          ru: 'Нотариальный договор или решение суда',
+          uz: 'Eski to‘lov kvitansiyalari (Soliq, svet, gaz)',
+          kr: 'Эски тўлов квитанциялари (Солиқ, свет, газ)',
+          ru: 'Архивные платежные квитанции за налоги и коммунальные услуги',
         ),
         officialName: MultiLangText(
-          uz: 'Mulk o‘tganligini tasdiqlovchi gerbli hujjat',
-          kr: 'Мулк ўтганлигини тасдиқловчи гербли ҳужжат',
-          ru: 'Документ с гербовой печатью о переходе прав',
+          uz: '2018-yil 1-mayga qadar yer va mol-mulk solig‘i, elektr va gaz to‘langanini tasdiqlovchi arxiv cheklari',
+          kr: '2018 йил 1 майга қадар ер ва мол-мулк солиғи, электр ва газ тўланганини тасдиқловчи архив чеклари',
+          ru: 'Квитанции об уплате земельного/имущественного налога и услуг ЖКХ до 1 мая 2018 года',
         ),
         whatIsIt: MultiLangText(
-          uz: 'Notariusda tuzilgan qonuniy hujjat.',
-          kr: 'Нотариусда тузилган қонуний ҳужжат.',
-          ru: 'Заверенный нотариусом договор.',
+          uz: 'Siz ushbu uyni ko‘p yillardan buyon egallab yashab kelayotganingizni isbotlovchi asosiy hujjat.',
+          kr: 'Сиз ушбу уйни кўп йиллардан буён эгаллаб яшаб келаётганингизни исботловчи асосий ҳужжат.',
+          ru: 'Ключевое доказательство добросовестного и непрерывного владения недвижимостью долгие годы.',
         ),
         insideContent: MultiLangText(
-          uz: '• QR-kod, notarius muhri va reyestr raqami.',
-          kr: '• QR-код, нотариус муҳри ва реестр рақами.',
-          ru: '• QR-код, печать и номер нотариального реестра.',
+          uz: '• To‘lovchi F.I.Sh.;\n• To‘lov qilingan yil va oy sanasi;\n• Mulkning joylashgan manzili.',
+          kr: '• Тўловчи Ф.И.Ш.;\n• Тўлов қилинган йил ва ой санаси;\n• Мулкнинг жойлашган манзили.',
+          ru: '• Ф.И.О. плательщика, архивные даты оплат и адрес строения.',
         ),
         whereToGet: MultiLangText(
-          uz: 'Bitim tuzilgan notarial idoradan olinadi.',
-          kr: 'Битим тузилган нотариал идорадан олинади.',
-          ru: 'В нотариальной конторе, где совершена сделка.',
+          uz: 'Shaxsiy arxiv hujjatlaringiz orasidan yoki bank/kommunal korxona arxiv bazalaridan.',
+          kr: 'Шахсий архив ҳужжатларингиз орасидан ёки банк/коммунал корхона архив базаларидан.',
+          ru: 'Из домашних архивов или выписок коммунальных баз снабжающих организаций.',
+        ),
+        arxitekturaBoglanishi: MultiLangText(
+          uz: 'Qurilish va arxitektura bo‘limi xatlov vaqtida bino xavfsizligini (daryo muhofazasi, yuqori kuchlanish ostida emasligini) bepul tekshiradi.',
+          kr: 'Қурилиш ва архитектура бўлими хатлов вақтида бино хавфсизлигини (дарё бўйи, ток симлари остида эмаслигини) бепул текширади.',
+          ru: 'Архитектура в составе комиссии бесплатно проверяет отсутствие нахождения дома в водоохранных и защитных зонах ЛЭП.',
         ),
       ),
     ],
     illegalDemands: [
-      MultiLangText(uz: 'Hokimiyatda qayta tasdiqlatish', kr: 'Ҳокимиятда қайта тасдиқлатиш', ru: 'Повторное утверждение в хокимияте'),
+      MultiLangText(uz: 'Amnistiyaga kiritish uchun alohida to‘lov', kr: 'Амнистияга киритиш учун алоҳида тўлов', ru: 'Плата за ускорение включения в списки'),
+      MultiLangText(uz: 'Tuman komissiyasiga norasmiy pul berish', kr: 'Туман комиссиясига норасмий пул бериш', ru: 'Неофициальные сборы членов комиссии'),
     ],
   ),
 
-  // 4
+  // 4. Mulk ko'chirmasi
   KadastrService(
     id: '4',
     icon: Icons.qr_code_2,
+    categoryId: 'spravka',
     titleSimple: MultiLangText(
-      uz: 'Davlat reyestridan ko‘chirma olish (Vipiska)',
-      kr: 'Давлат реестридан кўчирма олиш (Виписка)',
-      ru: 'Выписка из Государственного реестра прав (Выписка)',
+      uz: 'Davlat reyestridan elektron ko‘chirma olish (Vipiska)',
+      kr: 'Давлат реестридан электрон кўчирма олиш (Виписка)',
+      ru: 'Получение электронной выписки из Государственного реестра прав',
     ),
     titleOfficial: MultiLangText(
-      uz: 'Ko‘chmas mulk bo‘yicha davlat reyestridan ko‘chirma berish',
-      kr: 'Кўчмас мулк бўйича давлат реестридан кўчирма бериш',
-      ru: 'Предоставление выписки из Государственного реестра',
+      uz: 'Ko‘chmas mulk bo‘yicha davlat reyestridan ko‘chirma berish davlat xizmati',
+      kr: 'Кўчмас мулк бўйича давлат реестридан кўчирма бериш давлат хизмати',
+      ru: 'Предоставление выписки из Государственного реестра прав на недвижимость',
     ),
-    category: MultiLangText(uz: 'Maʼlumot', kr: 'Маълумот', ru: 'Справка'),
     purpose: MultiLangText(
-      uz: 'Mulk ayni daqiqada kimning nomida ekanini tasdiqlovchi QR-kodli yagona rasmiy elektron hujjat.',
-      kr: 'Мулк айни дақиқада кимнинг номида эканини тасдиқловчи QR-кодли ягона расмий электрон ҳужжат.',
-      ru: 'Официальный электронный документ с QR-кодом, подтверждающий текущего собственника.',
+      uz: 'Ayni paytda mulk kimning nomida ekanini tasdiqlovchi QR-kodli yagona huquqiy kuchga ega elektron hujjat.',
+      kr: 'Айни пайтда мулк кимнинг номида эканини тасдиқловчи QR-кодли ягона ҳуқуқий кучга эга электрон ҳужжат.',
+      ru: 'Единственный юридически значимый документ с QR-кодом, подтверждающий текущего собственника.',
     ),
-    duration: MultiLangText(uz: 'Real vaqtda (1 kun)', kr: 'Реал вақтда (1 кун)', ru: 'В реальном времени (1 день)'),
-    cost: MultiLangText(uz: 'BHMning 0.05 baravari', kr: 'БҲМнинг 0.05 баравари', ru: '0.05 БРВ'),
+    duration: MultiLangText(uz: 'Avtomatik (1 kun)', kr: 'Автоматик (1 кун)', ru: 'Автоматически (в реальном времени)'),
+    cost: MultiLangText(uz: 'BHMning 0.05 baravari (taxminan 18 750 so‘m)', kr: 'БҲМнинг 0.05 баравари (тахминан 18 750 сўм)', ru: '0.05 БРВ'),
     warningTip: MultiLangText(
-      uz: 'Eski ko‘k muhrli qog‘ozlar bekor bo‘lgan, hozirda faqat mana shu QR-kodli ko‘chirma qonuniy hisoblanadi.',
-      kr: 'Эски кўк муҳрли қоғозлар бекор бўлган, ҳозирда фақат шу QR-кодли кўчирма қонунийдир.',
-      ru: 'Старые бумажные свидетельства отменены, юридическую силу имеет только электронная выписка с QR-кодом.',
+      uz: 'Eski ko‘k muhrli qog‘ozlar bekor qilingan! Notarius va banklar faqat mana shu QR-kodli ko‘chirmani qabul qiladi.',
+      kr: 'Эски кўк муҳрли қоғозлар бекор қилинган! Нотариус ва банклар фақат шу QR-кодли кўчирмани қабул қилади.',
+      ru: 'Бумажные свидетельства отменены. Нотариусы признают только цифровую выписку с QR-кодом.',
     ),
     docs: [
       RequiredDocument(
@@ -374,1453 +571,360 @@ final List<KadastrService> allKadastrServices = [
           ru: 'Кадастровый номер',
         ),
         officialName: MultiLangText(
-          uz: 'Obyektning unikal kadastr raqami',
-          kr: 'Объектнинг уникал кадастр рақами',
+          uz: 'Ko‘chmas mulkning unikal kadastr kodi',
+          kr: 'Кўчмас мулкнинг уникал кадастр коди',
           ru: 'Уникальный кадастровый номер объекта',
         ),
         whatIsIt: MultiLangText(
-          uz: 'Mulkka berilgan 10 xonali elektron raqam.',
-          kr: 'Мулкка берилган 10 хонали электрон рақам.',
-          ru: '10-значный уникальный код объекта недвижимости.',
+          uz: 'Mulkka berilgan individual davlat raqami.',
+          kr: 'Мулкка берилган индивидуал давлат рақами.',
+          ru: 'Уникальный цифровой код объекта в реестре.',
         ),
         insideContent: MultiLangText(
-          uz: '• Hududiy va bino kodi.',
-          kr: '• Ҳудудий ва бино коди.',
-          ru: '• Зональный и пообъектный код.',
+          uz: '• Hududiy zonalar kodi va obyekt tartib raqami.',
+          kr: '• Ҳудудий зоналар коди ва объект тартиб рақами.',
+          ru: '• Зональный и порядковый код объекта.',
         ),
         whereToGet: MultiLangText(
-          uz: 'Kadastr pasportidan yoki my.gov.uz orqali.',
-          kr: 'Кадастр паспортидан ёки my.gov.uz орқали.',
+          uz: 'Kadastr pasportidan yoki my.gov.uz dagi shaxsiy kabinetdan olinadi.',
+          kr: 'Кадастр паспортидан ёки my.gov.uz даги шахсий кабинетдан олинади.',
           ru: 'Из паспорта объекта или кабинета my.gov.uz.',
         ),
+        arxitekturaBoglanishi: MultiLangText(uz: 'Talab etilmaydi.', kr: 'Талаб этилмайди.', ru: 'Не требуется.'),
       ),
     ],
     illegalDemands: [
-      MultiLangText(uz: 'Inspektorning uyga kelishi', kr: 'Инспекторнинг уйга келиши', ru: 'Выезд инспектора на дом'),
+      MultiLangText(uz: 'Kadastr xodimining joyiga borishi', kr: 'Кадастр ходимининг жойига бориши', ru: 'Выезд сотрудника на объект'),
     ],
   ),
 
-  // 5
+  // 5. Yer auksioni
   KadastrService(
     id: '5',
-    icon: Icons.person_off,
+    icon: Icons.gavel,
+    categoryId: 'yer',
     titleSimple: MultiLangText(
-      uz: 'Nomida uy yo‘qligi haqida maʼlumotnoma',
-      kr: 'Номида уй йўқлиги ҳақида маълумотнома',
-      ru: 'Справка об отсутствии жилья в собственности',
+      uz: 'Tadbirkorlik va uy qurish uchun yerni E-auksionda sotib olish',
+      kr: 'Тадбиркорлик ва уй қуриш учун ерни Э-аукционда сотиб олиш',
+      ru: 'Покупка земельного участка на онлайн-аукционе E-auksion',
     ),
     titleOfficial: MultiLangText(
-      uz: 'Fuqaro nomida shaxsiy turar joy mavjud emasligi to‘g‘risida maʼlumotnoma',
-      kr: 'Фуқаро номида шахсий турар жой мавжуд эмаслиги тўғрисида маълумотнома',
-      ru: 'Выдача справки об отсутствии собственного жилья',
+      uz: 'Yer uchastkalarini mulk va ijara huquqi asosida elektron auksion orqali ajratish',
+      kr: 'Ер участкаларини электрон аукцион орқали ажратиш',
+      ru: 'Предоставление участков в собственность или аренду через электронные торги',
     ),
-    category: MultiLangText(uz: 'Maʼlumot', kr: 'Маълумот', ru: 'Справка'),
     purpose: MultiLangText(
-      uz: 'Subsidiya yoki imtiyozli kredit olish uchun butun respublika bo‘yicha uyingiz yo‘qligini tasdiqlash.',
-      kr: 'Субсидия ёки имтиёзли кредит олиш учун бутун республика бўйича уйингиз йўқлигини тасдиқлаш.',
-      ru: 'Подтверждение отсутствия зарегистрированного жилья по всей республике для получения субсидий.',
+      uz: 'Bo‘sh turgan davlat yerlarini halol, ochiq va porasiz E-auksion savdolarida qonuniy sotib olish.',
+      kr: 'Бўш турган давлат ерларини ҳалол, очиқ ва порасиз Э-аукцион савдоларида қонуний сотиб олиш.',
+      ru: 'Прозрачная покупка свободных государственных земель на открытых онлайн-торгах без взяток.',
     ),
-    duration: MultiLangText(uz: 'Avtomatik (1 kun)', kr: 'Автоматик (1 кун)', ru: 'Автоматически (1 день)'),
-    cost: MultiLangText(uz: 'BHMning 0.05 baravari', kr: 'БҲМнинг 0.05 баравари', ru: '0.05 БРВ'),
+    duration: MultiLangText(uz: 'Auksion reglamentiga asosan', kr: 'Аукцион регламентига асосан', ru: 'Согласно регламенту торгов'),
+    cost: MultiLangText(uz: 'Savdoda shakllangan g‘oliblik narxi', kr: 'Савдода шаклланган ғолиблик нархи', ru: 'Итоговая победная стоимость лота'),
     warningTip: MultiLangText(
-      uz: 'Respublika bazalari JShSHIR orqali avtomatik tekshiriladi, hech qayerdan qog‘oz to‘plamaysiz.',
-      kr: 'Республика базалари ЖШШИР орқали автоматик текширилади, ҳеч қаердан қоғоз тўпламайсиз.',
-      ru: 'Проверка осуществляется автоматически по ПИНФЛ по всем регионам страны.',
+      uz: 'MUHIM: Hokimlarning to‘g‘ridan-to‘g‘ri yer ajratish vakolati mutlaqo bekor qilingan! Birorta amaldorga ishonib pul bermang!',
+      kr: 'МУҲИМ: Ҳокимларнинг тўғридан-тўғри ер ажратиш ваколати бекор қилинган! Ҳеч кимга ишониб пул берманг!',
+      ru: 'ВАЖНО: Прямое выделение земли хокимами запрещено законом! Не доверяйте мошенникам!',
     ),
     docs: [
       RequiredDocument(
         simpleName: MultiLangText(
-          uz: 'JShSHIR (ID-karta)',
-          kr: 'ЖШШИР (ID-карта)',
-          ru: 'ПИНФЛ (ID-карта)',
+          uz: 'ERI — Elektron raqamli imzo',
+          kr: 'ЭРИ — Электрон рақамли имзо',
+          ru: 'ЭЦП — Электронная цифровая подпись',
         ),
         officialName: MultiLangText(
-          uz: 'Shaxsiy 14 xonali identifikatsiya raqami',
-          kr: 'Шахсий 14 хонали идентификация рақами',
-          ru: 'Персональный 14-значный идентификационный номер',
+          uz: 'Davlat xizmatlari markazidan olingan ERI kaliti va sertifikati',
+          kr: 'Давлат хизматлари марказидан олинган ЭРИ калити',
+          ru: 'Сертификат и закрытый ключ ЭЦП',
         ),
         whatIsIt: MultiLangText(
-          uz: 'Fuqaroning yagona davlat kodi.',
-          kr: 'Фуқаронинг ягона давлат коди.',
-          ru: 'Единый код гражданина.',
+          uz: 'Savdolarda ishtirok etish va yer bayonnomasini tasdiqlash uchun shaxsiy raqamli imzo.',
+          kr: 'Савдоларда иштирок этиш ва баённомани тасдиқлаш учун рақамли имзо.',
+          ru: 'Цифровой ключ для подачи ставок и подписания итогового протокола.',
         ),
         insideContent: MultiLangText(
-          uz: '• 14 ta raqam.',
-          kr: '• 14 та рақам.',
-          ru: '• 14 цифр.',
+          uz: '• Fuqaroning JShSHIR kodi va sertifikati.',
+          kr: '• Фуқаронинг ЖШШИР коди ва сертификати.',
+          ru: '• ПИНФЛ гражданина и срок действия ключа.',
         ),
         whereToGet: MultiLangText(
-          uz: 'ID-kartangiz orqasida bo‘ladi.',
-          kr: 'ID-картангиз орқасида бўлади.',
-          ru: 'Указан на обратной стороне ID-карты.',
+          uz: 'Istalgan Davlat xizmatlari markazidan 5 daqiqada olinadi.',
+          kr: 'Исталган Давлат хизматлари марказидан 5 дақиқада олинади.',
+          ru: 'В любом Центре госуслуг за 5 минут.',
+        ),
+        arxitekturaBoglanishi: MultiLangText(
+          uz: 'Auksionga qo‘yilgan har bir yer maydoni arxitektura va ekologiya tomonidan oldindan 100% kelishilgan bo‘ladi.',
+          kr: 'Аукционга қўйилган ерлар архитектура ва экология томонидан олдиндан 100% келишилган бўлади.',
+          ru: 'Выставляемые лоты заранее согласованы со всеми градостроительными службами.',
         ),
       ),
     ],
     illegalDemands: [
-      MultiLangText(uz: 'Mahalladan maʼlumotnoma', kr: 'Маҳалладан маълумотнома', ru: 'Справка с махалли'),
+      MultiLangText(uz: 'Auksiondan keyin hokimiyatdan qo‘shimcha qaror kutish', kr: 'Аукциондан кейин ҳокимиятдан қарор кутиш', ru: 'Требование отдельного решения хокимията после аукциона'),
     ],
   ),
 
-  // 6
+  // 6. Noturar joy pasporti
   KadastrService(
     id: '6',
-    icon: Icons.block,
+    icon: Icons.store,
+    categoryId: 'noturar',
     titleSimple: MultiLangText(
-      uz: 'Mulkda taqiq (Zapret) bor-yo‘qligini tekshirish',
-      kr: 'Мулкда тақиқ (Запрет) бор-йўқлигини текшириш',
-      ru: 'Проверка арестов и обременений (Запрет)',
+      uz: 'Tadbirkorlik do‘koni, ofis va sexlarga kadastr olish',
+      kr: 'Тадбиркорлик дўкони, офис ва цехларга кадастр олиш',
+      ru: 'Кадастровый паспорт на коммерческий магазин, офис или склад',
     ),
     titleOfficial: MultiLangText(
-      uz: 'Ko‘chmas mulk bo‘yicha taqiq va xatlovlar to‘g‘risida maʼlumotnoma',
-      kr: 'Кўчмас мулк бўйича тақиқ ва хатловлар тўғрисида маълумотнома',
-      ru: 'Справка о наличии арестов и запретов на недвижимость',
+      uz: 'Ko‘chmas mulk obyektiga (noturar bino va inshootlar) kadastr pasportini berish',
+      kr: 'Кўчмас мулк объектига (нотурар бино) кадастр паспортини бериш',
+      ru: 'Выдача кадастрового паспорта на нежилое коммерческое здание',
     ),
-    category: MultiLangText(uz: 'Maʼlumot', kr: 'Маълумот', ru: 'Справка'),
     purpose: MultiLangText(
-      uz: 'Mulkka sud, MIB yoki banklar tomonidan taqiq qo‘yilganini sotib olishdan oldin aniqlash.',
-      kr: 'Мулкка суд, МИБ ёки банклар томонидан тақиқ қўйилганини сотиб олишдан олдин аниқлаш.',
-      ru: 'Проверка имущества на аресты БПИ, судебные запреты или банковский залог.',
+      uz: 'Tijorat faoliyati yuritiladigan binolarning elektron kadastr yig‘majildini shakllantirish.',
+      kr: 'Тижорат фаолияти юритиладиган биноларнинг электрон кадастр йиғмажилдини шакллантириш.',
+      ru: 'Оформление кадастрового дела на объекты коммерческого и промышленного назначения.',
     ),
-    duration: MultiLangText(uz: 'Real vaqtda (avtomat)', kr: 'Реал вақтда (автомат)', ru: 'В реальном времени (авто)'),
-    cost: MultiLangText(uz: 'BHMning 0.05 baravari', kr: 'БҲМнинг 0.05 баравари', ru: '0.05 БРВ'),
+    duration: MultiLangText(uz: '100 kv.m gacha — 5 ish kuni; 1000 kv.m gacha — 7 ish kuni', kr: '100 кв.м гача — 5 кун; 1000 кв.м гача — 7 кун', ru: 'До 100 кв.м — 5 дней; До 1000 кв.м — 7 дней'),
+    cost: MultiLangText(uz: 'Davlat stavkasi bo‘yicha hisoblangan elektron invoys', kr: 'Давлат ставкаси бўйича инвойс', ru: 'По утвержденному инвойсу'),
     warningTip: MultiLangText(
-      uz: 'Taqiqi bor mulkni xarid qilmang va taqiq yechilmaguncha zaklad bermang!',
-      kr: 'Тақиқи бор мулкни харид қилманг ва тақиқ ечилмагунча заклад берманг!',
-      ru: 'Не вносите задаток и не покупайте имущество до официального снятия запрета!',
+      uz: 'Bino maqsadi (masalan, turar joydan noturar joyga) o‘zgartirilgan bo‘lsa, tuman arxitekturasining qayta ixtisoslashtirish qarori bo‘lishi shart!',
+      kr: 'Бино мақсади (турардан нотурарга) ўзгартирилган бўлса, архитектуранинг қайта ихтисослаштириш қарори бўлиши шарт!',
+      ru: 'При переводе из жилого в нежилой фонд обязательно решение архитектуры о перепрофилировании!',
     ),
     docs: [
       RequiredDocument(
         simpleName: MultiLangText(
-          uz: 'Mulk kadastr raqami',
-          kr: 'Мулк кадастр рақами',
-          ru: 'Кадастровый номер объекта',
+          uz: 'Qurilish inspeksiyasi qabul dalolatnomasi',
+          kr: 'Қурилиш инспекцияси қабул далолатномаси',
+          ru: 'Акт ввода в эксплуатацию инспекции Минстроя',
         ),
         officialName: MultiLangText(
-          uz: 'Tekshirilayotgan uyning kadastr raqami',
-          kr: 'Текширилаётган уйнинг кадастр рақами',
-          ru: 'Кадастровый номер проверяемой недвижимости',
+          uz: 'Tugallangan binoni foydalanishga qabul qilish to‘g‘risida ruxsatnoma',
+          kr: 'Тугалланган бинони фойдаланишга қабул қилиш тўғрисида рухсатнома',
+          ru: 'Разрешение на ввод завершенного строительством объекта в эксплуатацию',
         ),
         whatIsIt: MultiLangText(
-          uz: 'Uyning raqami.',
-          kr: 'Уйнинг рақами.',
-          ru: 'Номер объекта.',
+          uz: 'Do‘kon yoki bino xavfsiz qurilganini tasdiqlovchi dalolatnoma.',
+          kr: 'Дўкон ёки бино хавфсиз қурилганини тасдиқловчи далолатнома.',
+          ru: 'Акт комиссии о соответствии нормам пожарной и сейсмической безопасности.',
         ),
         insideContent: MultiLangText(
-          uz: '• Manzil va parametrlar.',
-          kr: '• Манзил ва параметрлар.',
-          ru: '• Адрес и параметры.',
+          uz: '• Arxitektura, yong‘in xavfsizligi va SES xulosalari.',
+          kr: '• Архитектура, ёнғин хавфсизлиги ва СЭС хулосалари.',
+          ru: '• Согласования органов пожарного надзора, архитектуры и СЭС.',
         ),
         whereToGet: MultiLangText(
-          uz: 'Sotuvchining kadastr pasportidan.',
-          kr: 'Сотувчининг кадастр паспортидан.',
-          ru: 'Из паспорта собственника.',
+          uz: 'Qurilish nazorati inspeksiyasidan (GASN).',
+          kr: 'Қурилиш назорати инспекциясидан (ГАСН).',
+          ru: 'В районной инспекции строительного надзора.',
+        ),
+        arxitekturaBoglanishi: MultiLangText(
+          uz: 'Tadbirkorlik obyektlarida arxitektura va GASN ruxsatisiz bitta ham bino kadastr ro‘yxatidan o‘tmaydi.',
+          kr: 'Тадбиркорлик объектларида архитектура ва ГАСН рухсатисиз бирорта бино рўйхатдан ўтмайди.',
+          ru: 'Для коммерческих объектов согласование архитектуры и инспекции строго обязательно.',
         ),
       ),
     ],
     illegalDemands: [
-      MultiLangText(uz: 'MIBdan yozma maʼlumotnoma', kr: 'МИБдан ёзма маълумотнома', ru: 'Письменная справка из БПИ'),
-    ],
-  ),
-
-  // 7
-  KadastrService(
-    id: '7',
-    icon: Icons.call_split,
-    titleSimple: MultiLangText(
-      uz: 'Hovli yoki uyni ikkiga bo‘lish (Alohida qilish)',
-      kr: 'Ҳовли ёки уйни иккига бўлиш (Алоҳида қилиш)',
-      ru: 'Раздел или объединение объектов недвижимости',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Ko‘chmas mulk obyektini bo‘lish yoki birlashtirish davlat xizmati',
-      kr: 'Кўчмас мулк объектини бўлиш ёки бирлаштириш давлат хизмати',
-      ru: 'Государственная услуга по разделу или объединению недвижимости',
-    ),
-    category: MultiLangText(uz: 'Chegara', kr: 'Чегара', ru: 'Границы'),
-    purpose: MultiLangText(
-      uz: 'Umumiy hovlini mustaqil ikki alohida xonadonlarga ajratish va alohida kadastr berish.',
-      kr: 'Умумий ҳовлини мустақил икки алоҳида хонадонларга ажратиш ва алоҳида кадастр бериш.',
-      ru: 'Раздел единого жилого дома на два самостоятельных объекта с отдельными кадастрами.',
-    ),
-    duration: MultiLangText(uz: '10–15 ish kuni', kr: '10–15 иш куни', ru: '10–15 раб. дней'),
-    cost: MultiLangText(uz: 'Maydoniga asosan invoys', kr: 'Майдонига асосан инвойс', ru: 'По инвойсу в зависимости от площади'),
-    warningTip: MultiLangText(
-      uz: 'Har bir yangi bo‘lingan hovlida ko‘chaga mustaqil chiqish darvozasi (yo‘li) bo‘lishi shart!',
-      kr: 'Ҳар бир янги бўлинган ҳовлида кўчага мустақил чиқиш дарвозаси (йўли) бўлиши шарт!',
-      ru: 'Обязательное градостроительное требование: каждый разделенный дом должен иметь отдельный выход на улицу!',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Taqsimlash bitimi yoki sud ajrimi',
-          kr: 'Тақсимлаш битими ёки суд ажрими',
-          ru: 'Соглашение о разделе или решение суда',
-        ),
-        officialName: MultiLangText(
-          uz: 'Notarial tasdiqlangan bo‘lish shartnomasi',
-          kr: 'Нотариал тасдиқланган бўлиш шартномаси',
-          ru: 'Нотариально заверенный договор о разделе имущества',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Egalarining uyni taqsimlash kelishuvi.',
-          kr: 'Эгаларининг уйни тақсимлаш келишуви.',
-          ru: 'Соглашение собственников о распределении долей.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Xonalar va sotixlar taqsimoti.',
-          kr: '• Хоналар ва сотихлар тақсимоти.',
-          ru: '• Схема распределения комнат и участка.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'Notariusdan yoki fuqarolik sudidan.',
-          kr: 'Нотариусдан ёки фуқаролик судидан.',
-          ru: 'У нотариуса или в гражданском суде.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Yangi kommunal hisoblarni oldindan talab qilish', kr: 'Янги коммунал ҳисобларни олдиндан талаб қилиш', ru: 'Требование предварительных коммунальных лицевых счетов'),
-    ],
-  ),
-
-  // 8
-  KadastrService(
-    id: '8',
-    icon: Icons.apartment,
-    titleSimple: MultiLangText(
-      uz: 'Ko‘p qavatli uy tutash yerlarini rasmiylashtirish',
-      kr: 'Кўп қаватли уй туташ ерларини расмийлаштириш',
-      ru: 'Оформление прилегающей территории многоквартирного дома',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Ko‘p kvartirali uyga tutash yer uchastkasini ro‘yxatdan o‘tkazish',
-      kr: 'Кўп квартирали уйга туташ ер участкасини рўйхатдан ўтказиш',
-      ru: 'Регистрация придомового земельного участка многоквартирного дома',
-    ),
-    category: MultiLangText(uz: 'Yer', kr: 'Ер', ru: 'Земля'),
-    purpose: MultiLangText(
-      uz: 'Dom oldidagi bolalar maydonchasi va hududni begona qurilishlardan himoya qilib, umumiy mulk qilish.',
-      kr: 'Дом олдидаги болалар майдончаси ва ҳудудни бегона қурилишлардан ҳимоя қилиб, умумий мулк қилиш.',
-      ru: 'Защита двора от точечной застройки и закрепление земли в общее пользование жильцов.',
-    ),
-    duration: MultiLangText(uz: '10 ish kuni', kr: '10 иш куни', ru: '10 раб. дней'),
-    cost: MultiLangText(uz: 'Bepul / Minimal', kr: 'Бепул / Минимал', ru: 'Бесплатно / Минимальный'),
-    warningTip: MultiLangText(
-      uz: 'Bu yer bitta shaxsga xususiylashtirilmaydi, butun dom aholisining daxlsiz umumiy mulki bo‘ladi.',
-      kr: 'Бу ер битта шахсга хусусийлаштирилмайди, бутун дом аҳолисининг дахлсиз умумий мулки бўлади.',
-      ru: 'Придомовая земля не подлежит приватизации отдельными лицами, являясь общей собственностью жильцов.',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Aholi yig‘ilishi bayonnomasi',
-          kr: 'Аҳоли йиғилиши баённомаси',
-          ru: 'Протокол общего собрания жильцов',
-        ),
-        officialName: MultiLangText(
-          uz: 'Mulkdorlar umumiy yig‘ilishi qarori',
-          kr: 'Мулкдорлар умумий йиғилиши қарори',
-          ru: 'Решение общего собрания собственников квартир',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Aholining 50% dan ko‘pi imzolagan qaror.',
-          kr: 'Аҳолининг 50% дан кўпи имзолаган қарор.',
-          ru: 'Протокол с подписями более 50% собственников.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Xonadon raqamlari va imzolar.',
-          kr: '• Хонадон рақамлари ва имзолар.',
-          ru: '• Номера квартир и личные подписи.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'Boshqaruv kompaniyasi (BSHM) orqali.',
-          kr: 'Бошқарув компанияси (БСҲМ) орқали.',
-          ru: 'Через управляющую сервисную компанию (УК).',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Har bir kvartiradan alohida ariza', kr: 'Ҳар бир квартирадан алоҳида ариза', ru: 'Отдельное заявление от каждой квартиры'),
-    ],
-  ),
-
-  // 9
-  KadastrService(
-    id: '9',
-    icon: Icons.history_edu,
-    titleSimple: MultiLangText(
-      uz: 'Bino va inshootlar ijara shartnomasini ro‘yxatdan o‘tkazish',
-      kr: 'Бино ва иншоотлар ижара шартномасини рўйхатдан ўтказиш',
-      ru: 'Регистрация договора аренды зданий и сооружений',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Ko‘chmas mulk ijara shartnomasini davlat ro‘yxatidan o‘tkazish',
-      kr: 'Кўчмас мулк ижара шартномасини давлат рўйхатидан ўтказиш',
-      ru: 'Госрегистрация договора долгосрочной аренды недвижимости',
-    ),
-    category: MultiLangText(uz: 'Ro‘yxat', kr: 'Рўйхат', ru: 'Реестр'),
-    purpose: MultiLangText(
-      uz: 'Noturar bino yoki do‘kon 1 yildan ortiqqa ijaraga berilganda huquqni davlat ro‘yxatidan o‘tkazish.',
-      kr: 'Нотурар бино ёки дўкон 1 йилдан ортиққа ижарага берилганда ҳуқуқни давлат рўйхатидан ўтказиш.',
-      ru: 'Государственная регистрация аренды нежилых объектов на срок более 1 года.',
-    ),
-    duration: MultiLangText(uz: '2 ish kuni', kr: '2 иш куни', ru: '2 раб. дня'),
-    cost: MultiLangText(uz: 'BHMning 0.5 baravari', kr: 'БҲМнинг 0.5 баравари', ru: '0.5 БРВ'),
-    warningTip: MultiLangText(
-      uz: '1 yildan ortiq ijaralar kadastrda ro‘yxatdan o‘tmasa, sudda haqiqiy hisoblanmaydi.',
-      kr: '1 йилдан ортиқ ижаралар кадастрда рўйхатдан ўтмаса, судда ҳақиқий ҳисобланмайди.',
-      ru: 'Договоры аренды свыше одного года без кадастровой регистрации не признаются судом действительными.',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Ijara shartnomasi',
-          kr: 'Ижара шартномаси',
-          ru: 'Договор аренды',
-        ),
-        officialName: MultiLangText(
-          uz: 'Notarial yoki elektron imzolangan bitim',
-          kr: 'Нотариал ёки электрон имзоланган битим',
-          ru: 'Нотариальный или электронный договор аренды',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Ijara beruvchi va oluvchi o‘rtasidagi bitim.',
-          kr: 'Ижара берувчи ва олувчи ўртасидаги битим.',
-          ru: 'Официальный договор между арендодателем и арендатором.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Muddati, narxi va to‘lov shartlari.',
-          kr: '• Муддати, нархи ва тўлов шартлари.',
-          ru: '• Срок, сумма оплаты и порядок расчетов.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'ijara.soliq.uz yoki notariusdan.',
-          kr: 'ijara.soliq.uz ёки нотариусдан.',
-          ru: 'Через портал ijara.soliq.uz или у нотариуса.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Binoni qayta inventarizatsiyadan o‘tkazish', kr: 'Бинони қайта инвентаризациядан ўтказиш', ru: 'Повторная техническая инвентаризация объекта'),
-    ],
-  ),
-
-  // 10
-  KadastrService(
-    id: '10',
-    icon: Icons.landscape,
-    titleSimple: MultiLangText(
-      uz: 'Yer uchastkasi ijara shartnomasini ro‘yxatdan o‘tkazish',
-      kr: 'Ер участкаси ижара шартномасини рўйхатдан ўтказиш',
-      ru: 'Госрегистрация договора долгосрочной аренды земельного участка',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Yer uchastkasini ijaraga olish shartnomasini davlat ro‘yxatidan o‘tkazish',
-      kr: 'Ер участкасини ижарага олиш шартномасини давлат рўйхатидан ўтказиш',
-      ru: 'Государственная регистрация аренды земли',
-    ),
-    category: MultiLangText(uz: 'Yer', kr: 'Ер', ru: 'Земля'),
-    purpose: MultiLangText(
-      uz: 'E-auksion yoki ochiq tanlovda yutib olingan qishloq xo‘jaligi yoki tadbirkorlik yerini rasmiylashtirish.',
-      kr: 'Э-аукцион ёки очиқ танловда ютиб олинган қишлоқ хўжалиги ёки тадбиркорлик ерини расмийлаштириш.',
-      ru: 'Регистрация аренды сельхоз или коммерческой земли, выигранной на открытых торгах.',
-    ),
-    duration: MultiLangText(uz: '2 ish kuni', kr: '2 иш куни', ru: '2 раб. дня'),
-    cost: MultiLangText(uz: 'BHMning 1 baravari', kr: 'БҲМнинг 1 баравари', ru: '1 БРВ'),
-    warningTip: MultiLangText(
-      uz: 'Hokimning to‘g‘ridan-to‘g‘ri qarori bilan berilmaydi, faqat elektron tanlov bayonnomasi asosida ro‘yxatga olinadi.',
-      kr: 'Ҳокимнинг тўғридан-тўғри қарори билан берилмайди, фақат электрон танлов баённомаси асосида рўйхатга олинади.',
-      ru: 'Прямые решения хокимов отменены: регистрация проводится строго по протоколу электронного аукциона.',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Auksion bayonnomasi',
-          kr: 'Аукцион баённомаси',
-          ru: 'Протокол аукциона',
-        ),
-        officialName: MultiLangText(
-          uz: 'Yer ajratish bo‘yicha tanlov bayonnomasi',
-          kr: 'Ер ажратиш бўйича танлов баённомаси',
-          ru: 'Протокол открытого конкурса на право аренды',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Tanlovda g‘olib bo‘lganingizni tasdiqlovchi QR-kodli hujjat.',
-          kr: 'Танловда ғолиб бўлганингизни тасдиқловчи QR-кодли ҳужжат.',
-          ru: 'Электронный протокол о победе в торгах.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Kontur raqami va gektar o‘lchami.',
-          kr: '• Контур рақами ва гектар ўлчами.',
-          ru: '• Номер контура и площадь в гектарах.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'E-auksion.uz tizimidan yuklanadi.',
-          kr: 'E-auksion.uz тизимидан юкланади.',
-          ru: 'Скачивается из личного кабинета E-auksion.uz.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Qishloq xo‘jaligi bo‘limidan alohida xat', kr: 'Қишлоқ хўжалиги бўлимидан алоҳида хат', ru: 'Дополнительное письмо из отдела сельского хозяйства'),
-    ],
-  ),
-
-  // 11
-  KadastrService(
-    id: '11',
-    icon: Icons.account_balance,
-    titleSimple: MultiLangText(
-      uz: 'Ipoteka va garov huquqini ro‘yxatga olish / yechish',
-      kr: 'Ипотека ва гаров ҳуқуқини рўйхатга олиш / ечиш',
-      ru: 'Регистрация и снятие залога и ипотеки недвижимости',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Ko‘chmas mulk ipotekasi va garov shartnomasini ro‘yxatga olish',
-      kr: 'Кўчмас мулк ипотекаси ва гаров шартномасини рўйхатга олиш',
-      ru: 'Госрегистрация и снятие договора ипотеки (залога)',
-    ),
-    category: MultiLangText(uz: 'Ro‘yxat', kr: 'Рўйхат', ru: 'Реестр'),
-    purpose: MultiLangText(
-      uz: 'Bank krediti uchun uyni garovga qo‘yish yoki kredit yopilgach, taqiqni bepul yechish.',
-      kr: 'Банк кредити учун уйни гаровга қўйиш ёки кредит ёпилгач, тақиқни бепул ечиш.',
-      ru: 'Оформление залога под банковский кредит или оперативное снятие обременения после погашения.',
-    ),
-    duration: MultiLangText(uz: '1 ish kuni', kr: '1 иш куни', ru: '1 раб. день'),
-    cost: MultiLangText(uz: 'BHMning 50% miqdorida', kr: 'БҲМнинг 50% миқдорида', ru: '50% от БРВ'),
-    warningTip: MultiLangText(
-      uz: 'Kredit to‘langach, bank xodimi tizim orqali taqiqni yechishni o‘zi bepul amalga oshirishi shart!',
-      kr: 'Кредит тўлангач, банк ходими тизим орқали тақиқни ечишни ўзи бепул амалга ошириши шарт!',
-      ru: 'После закрытия кредита банк обязан электронно и бесплатно снять запрет через систему!',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Ipoteka shartnomasi',
-          kr: 'Ипотека шартномаси',
-          ru: 'Договор ипотеки',
-        ),
-        officialName: MultiLangText(
-          uz: 'Notarial tasdiqlangan ipoteka bitimi',
-          kr: 'Нотариал тасдиқланган ипотека битими',
-          ru: 'Нотариально удостоверенный договор ипотеки',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Mulk qaysi bankka garovga qo‘yilgani hujjati.',
-          kr: 'Мулк қайси банкка гаровга қўйилгани ҳужжати.',
-          ru: 'Документ о залоге объекта в банке.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Kredit summasi va kadastr raqami.',
-          kr: '• Кредит суммаси ва кадастр рақами.',
-          ru: '• Сумма кредита и кадастровый номер.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'Bank va notariusdan.',
-          kr: 'Банк ва нотариусдан.',
-          ru: 'В банке и нотариальной конторе.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Bank vakilining markazga borishi', kr: 'Банк вакилининг марказга бориши', ru: 'Личный визит сотрудника банка в Центр'),
-    ],
-  ),
-
-  // 12
-  KadastrService(
-    id: '12',
-    icon: Icons.alt_route,
-    titleSimple: MultiLangText(
-      uz: 'Servitut kelishuvi (Qo‘shni yeridan yo‘l ochish)',
-      kr: 'Сервитут келишуви (Қўшни еридан йўл очиш)',
-      ru: 'Государственная регистрация права сервитута (Проход через участок)',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Servitut huquqini davlat ro‘yxatidan o‘tkazish',
-      kr: 'Сервитут ҳуқуқини давлат рўйхатидан ўтказиш',
-      ru: 'Государственная регистрация права сервитута',
-    ),
-    category: MultiLangText(uz: 'Yer', kr: 'Ер', ru: 'Земля'),
-    purpose: MultiLangText(
-      uz: 'Uyingizga kirish uchun qo‘shnining hovlisidan yo‘l yoki quvur o‘tkazish huquqini qonuniylashtirish.',
-      kr: 'Уйингизга кириш учун қўшнининг ҳовлисидан йўл ёки қувур ўтказиш ҳуқуқини қонунийлаштириш.',
-      ru: 'Юридическое закрепление права прохода или прокладки коммуникаций через чужой земельный участок.',
-    ),
-    duration: MultiLangText(uz: '2 ish kuni', kr: '2 иш куни', ru: '2 раб. дня'),
-    cost: MultiLangText(uz: 'BHMning 0.5 baravari', kr: 'БҲМнинг 0.5 баравари', ru: '0.5 БРВ'),
-    warningTip: MultiLangText(
-      uz: 'Servitut ro‘yxatdan o‘tkazilsa, qo‘shni almashsa ham sizning o‘tish huquqingiz daxlsiz saqlanadi.',
-      kr: 'Сервитут рўйхатдан ўтказилса, қўшни алмашса ҳам сизнинг ўтиш ҳуқуқингиз дахлсиз сақланади.',
-      ru: 'Сервитут сохраняется даже при смене собственника соседнего участка.',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Servitut bitimi yoki sud qarori',
-          kr: 'Сервитут битими ёки суд қарори',
-          ru: 'Соглашение о сервитуте или решение суда',
-        ),
-        officialName: MultiLangText(
-          uz: 'Notarial shartnoma yoki sud hujjati',
-          kr: 'Нотариал шартнома ёки суд ҳужжати',
-          ru: 'Нотариальное соглашение или судебное решение',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Qo‘shnilar kelishuvi.',
-          kr: 'Қўшнилар келишуви.',
-          ru: 'Соглашение сторон.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Yo‘lning eni, uzunligi va chizmasi.',
-          kr: '• Йўлнинг эни, узунлиги ва чизмаси.',
-          ru: '• Схема, ширина и длина полосы прохода.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'Notariusda tuziladi yoki suddan olinadi.',
-          kr: 'Нотариусда тузилади ёки суддан олинади.',
-          ru: 'Оформляется у нотариуса или получается в суде.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Qo‘shnining butun hovlisini qayta o‘lchash', kr: 'Қўшнининг бутун ҳовлисини қайта ўлчаш', ru: 'Повторный замер всего участка соседа'),
-    ],
-  ),
-
-  // 13
-  KadastrService(
-    id: '13',
-    icon: Icons.park,
-    titleSimple: MultiLangText(
-      uz: 'Ko‘p yillik bog‘ va daraxtzorlarga kadastr olish',
-      kr: 'Кўп йиллик боғ ва дарахтзорларга кадастр олиш',
-      ru: 'Кадастровый паспорт на многолетние насаждения и сады',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Ko‘p yillik dov-daraxtlarga kadastr pasportini shakllantirish',
-      kr: 'Кўп йиллик дов-дарахтларга кадастр паспортини шакллантириш',
-      ru: 'Оформление кадастрового паспорта на многолетние насаждения',
-    ),
-    category: MultiLangText(uz: 'Pasport', kr: 'Паспорт', ru: 'Паспорт'),
-    purpose: MultiLangText(
-      uz: 'Intensiv bog‘lar va mevali daraxtzorlarni ko‘chmas mulk sifatida hisobga olish.',
-      kr: 'Интенсив боғлар ва мевали дарахтзорларни кўчмас мулк сифатида ҳисобга олиш.',
-      ru: 'Регистрация коммерческих садов и насаждений как объектов недвижимости.',
-    ),
-    duration: MultiLangText(uz: '5 ish kuni', kr: '5 иш куни', ru: '5 раб. дней'),
-    cost: MultiLangText(uz: 'Bog‘ maydoniga qarab', kr: 'Боғ майдонига қараб', ru: 'В зависимости от площади сада'),
-    warningTip: MultiLangText(
-      uz: 'Bog‘ ekilgan yerga bo‘lgan ijara yoki egalik hujjati bo‘lishi shart.',
-      kr: 'Боғ экилган ерга бўлган ижара ёки эгалик ҳужжати бўлиши шарт.',
-      ru: 'Обязательно наличие прав аренды или собственности на земельный участок.',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Yer hujjati',
-          kr: 'Ер ҳужжати',
-          ru: 'Документ на землю',
-        ),
-        officialName: MultiLangText(
-          uz: 'Yer ijara shartnomasi yoki reyestr ko‘chirmasi',
-          kr: 'Ер ижара шартномаси ёки реестр кўчирмаси',
-          ru: 'Договор аренды земли или выписка из реестра',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Bog‘ joylashgan yerning davlat hujjati.',
-          kr: 'Боғ жойлашган ернинг давлат ҳужжати.',
-          ru: 'Правоустанавливающий документ на землю.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Maydoni va daraxt turlari.',
-          kr: '• Майдони ва дарахт турлари.',
-          ru: '• Площадь и виды деревьев.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'Kadastr reyestridan.',
-          kr: 'Кадастр реестридан.',
-          ru: 'Из Единого реестра кадастра.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Ekologiya idorasidan ruxsatnoma', kr: 'Экология идорасидан рухсатнома', ru: 'Разрешение от органов экологии'),
-    ],
-  ),
-
-  // 14
-  KadastrService(
-    id: '14',
-    icon: Icons.gavel,
-    titleSimple: MultiLangText(
-      uz: 'Tadbirkorlik uchun yerni E-auksion orqali olish',
-      kr: 'Тадбиркорлик учун ерни Э-аукцион орқали олиш',
-      ru: 'Приобретение земли под бизнес через E-auksion',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Yer uchastkalarini tadbirkorlik uchun elektron auksion orqali ajratish',
-      kr: 'Ер участкаларини тадбиркорлик учун электрон аукцион орқали ажратиш',
-      ru: 'Предоставление участков под предпринимательство на онлайн-аукционе',
-    ),
-    category: MultiLangText(uz: 'Auksion', kr: 'Аукцион', ru: 'Аукцион'),
-    purpose: MultiLangText(
-      uz: 'Bo‘sh turgan davlat yerlarini savdo yoki ishlab chiqarish uchun halol auksionda yutib olish.',
-      kr: 'Бўш турган давлат ерларини савдо ёки ишлаб чиқариш учун ҳалол аукционда ютиб олиш.',
-      ru: 'Открытая покупка земельных участков под бизнес на прозрачных онлайн-торгах.',
-    ),
-    duration: MultiLangText(uz: 'Auksion jadvali bo‘yicha', kr: 'Аукцион жадвали бўйича', ru: 'Согласно графику торгов'),
-    cost: MultiLangText(uz: 'Auksion savdo bahosi', kr: 'Аукцион савдо баҳоси', ru: 'Итоговая аукционная стоимость'),
-    warningTip: MultiLangText(
-      uz: 'Hokimlar to‘g‘ridan-to‘g‘ri yer bera olmaydi! "Yer olib beraman" degan firibgarlarga pul bermang!',
-      kr: 'Ҳокимлар тўғридан-тўғри ер бера олмайди! "Ер олиб бераман" деган фирибгарларга пул берманг!',
-      ru: 'Хокимы лишены права прямого выделения земель! Остерегайтесь мошенников-посредников!',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Elektron raqamli imzo (ERI)',
-          kr: 'Электрон рақамли имзо (ЭРИ)',
-          ru: 'Электронная цифровая подпись (ЭЦП)',
-        ),
-        officialName: MultiLangText(
-          uz: 'ERI kaliti va sertifikati',
-          kr: 'ЭРИ калити ва сертификати',
-          ru: 'Ключ и сертификат ЭЦП',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Auksionda savdolashish uchun raqamli kalit.',
-          kr: 'Аукционда савдолашиш учун рақамли калит.',
-          ru: 'Электронный ключ для торгов.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Foydalanuvchi maʼlumotlari.',
-          kr: '• Фойдаланувчи маълумотлари.',
-          ru: '• Данные заявителя.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'DXMdan 10 daqiqada olinadi.',
-          kr: 'ДХМдан 10 дақиқада олинади.',
-          ru: 'В Центре госуслуг за 10 минут.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Hokimiyatdan qo‘shimcha farmoyish kutish', kr: 'Ҳокимиятдан қўшимча фармойиш кутиш', ru: 'Ожидание дополнительного распоряжения хокимията'),
-    ],
-  ),
-
-  // 15
-  KadastrService(
-    id: '15',
-    icon: Icons.agriculture,
-    titleSimple: MultiLangText(
-      uz: 'Qishloq xo‘jaligi yerlarini ijaraga olish tanlovi',
-      kr: 'Қишлоқ хўжалиги ерларини ижарага олиш танлови',
-      ru: 'Электронный конкурс по аренде сельскохозяйственных земель',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Qishloq xo‘jaligiga mo‘ljallangan yerlarni elektron ochiq tanlov orqali berish',
-      kr: 'Қишлоқ хўжалигига мўлжалланган ерларни электрон очиқ танлов орқали бериш',
-      ru: 'Предоставление земель сельхозназначения через открытый конкурс',
-    ),
-    category: MultiLangText(uz: 'Yer', kr: 'Ер', ru: 'Земля'),
-    purpose: MultiLangText(
-      uz: 'Ekin ekish yoki bog‘dorchilik uchun yerlarni "E-yer" orqali inson omilisiz ijaraga olish.',
-      kr: 'Экин экиш ёки боғдорчилик учун ерларни "E-yer" орқали инсон омилисиз ижарага олиш.',
-      ru: 'Аренда сельхозземель через систему "E-yer" по балльной оценке без человеческого фактора.',
-    ),
-    duration: MultiLangText(uz: 'Tanlov muddati asosida', kr: 'Танлов муддати асосида', ru: 'По регламенту конкурса'),
-    cost: MultiLangText(uz: 'Tanlov qoidalariga ko‘ra', kr: 'Танлов қоидаларига кўра', ru: 'Согласно правилам конкурса'),
-    warningTip: MultiLangText(
-      uz: 'G‘olib kompyuter reytingi orqali shaffof aniqlanadi.',
-      kr: 'Ғолиб компьютер рейтинги орқали шаффоф аниқланади.',
-      ru: 'Победитель определяется автоматическим компьютерным рейтингом.',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Biznes-reja',
-          kr: 'Бизнес-режа',
-          ru: 'Бизнес-план',
-        ),
-        officialName: MultiLangText(
-          uz: 'Yer samaradorligi bo‘yicha taklif',
-          kr: 'Ер самарадорлиги бўйича таклиф',
-          ru: 'План эффективного освоения земельного участка',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Yerda nima ekishingiz rejasi.',
-          kr: 'Ерда нима экишингиз режаси.',
-          ru: 'Программа культивации и инвестиций.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Ekin turlari va ish o‘rinlari.',
-          kr: '• Экин турлари ва иш ўринлари.',
-          ru: '• Виды культур и рабочие места.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'Ariza beruvchi tayyorlaydi.',
-          kr: 'Ариза берувчи тайёрлайди.',
-          ru: 'Составляется заявителем самостоятельно.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Qishloq xo‘jaligi bo‘limidan alohida xat', kr: 'Қишлоқ хўжалиги бўлимидан алоҳида хат', ru: 'Письмо из агроотдела'),
-    ],
-  ),
-
-  // 16
-  KadastrService(
-    id: '16',
-    icon: Icons.pin,
-    titleSimple: MultiLangText(
-      uz: 'Eski va yangi kadastr raqamlarini solishtirish',
-      kr: 'Эски ва янги кадастр рақамларини солиштириш',
-      ru: 'Справка о сопоставлении старого и нового кадастровых номеров',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Ko‘chmas mulkning yangilangan kadastr raqami to‘g‘risida maʼlumotnoma',
-      kr: 'Кўчмас мулкнинг янгиланган кадастр рақами тўғрисида маълумотнома',
-      ru: 'Предоставление справки о новом кадастровом номере',
-    ),
-    category: MultiLangText(uz: 'Maʼlumot', kr: 'Маълумот', ru: 'Справка'),
-    purpose: MultiLangText(
-      uz: 'Eski pasportdagi raqam yangi elektron tizimda qaysi raqamga o‘zgarganini tasdiqlash.',
-      kr: 'Эски паспортдаги рақам янги электрон тизимда қайси рақамга ўзгарганини тасдиқлаш.',
-      ru: 'Подтверждение соответствия старого номера объекта новому системному номеру.',
-    ),
-    duration: MultiLangText(uz: 'Avtomatik (1 kun)', kr: 'Автоматик (1 кун)', ru: 'Автоматически (1 день)'),
-    cost: MultiLangText(uz: 'Bepul', kr: 'Бепул', ru: 'Бесплатно'),
-    warningTip: MultiLangText(
-      uz: 'Notariusda eski uyingiz chiqmay qolsa, bu maʼlumotnoma bepul olinadi.',
-      kr: 'Нотариусда эски уйингиз чиқмай қолса, бу маълумотнома бепул олинади.',
-      ru: 'Выдается бесплатно, если нотариус не находит старый номер объекта в базе.',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Eski kadastr daftarchasi',
-          kr: 'Эски кадастр дафтарчаси',
-          ru: 'Старый техпаспорт',
-        ),
-        officialName: MultiLangText(
-          uz: 'Eski namunadagi qog‘oz pasport',
-          kr: 'Эски намунадаги қоғоз паспорт',
-          ru: 'Технический паспорт старого образца',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Qo‘ldagi eski kadastr hujjati.',
-          kr: 'Қўлдаги эски кадастр ҳужжати.',
-          ru: 'Бумажная книжка старого кадастра.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Eski raqam va manzil.',
-          kr: '• Эски рақам ва манзил.',
-          ru: '• Старый номер и адрес.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'Shaxsiy arxiv hujjatlaridan.',
-          kr: 'Шахсий архив ҳужжатларидан.',
-          ru: 'Из личного домашнего архива.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Xodimni uyga chaqirib pul berish', kr: 'Ходимни уйга чақириб пул бериш', ru: 'Оплата за выезд сотрудника на дом'),
-    ],
-  ),
-
-  // 17
-  KadastrService(
-    id: '17',
-    icon: Icons.signpost,
-    titleSimple: MultiLangText(
-      uz: 'Uyga rasmiy ko‘cha nomi va manzil berish',
-      kr: 'Уйга расмий кўча номи ва манзил бериш',
-      ru: 'Присвоение и изменение официального почтового адреса',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Ko‘chmas mulk obyektiga manzil berish va o‘zgartirish (Manzillar reyestri)',
-      kr: 'Кўчмас мулк объектига манзил бериш ва ўзгартириш (Манзиллар реестри)',
-      ru: 'Присвоение и изменение адреса объекта недвижимости',
-    ),
-    category: MultiLangText(uz: 'Ro‘yxat', kr: 'Рўйхат', ru: 'Реестр'),
-    purpose: MultiLangText(
-      uz: 'Yangi uyga tuman hokimiyati tomonidan rasmiy ko‘cha nomi va uy raqami berilishi.',
-      kr: 'Янги уйга туман ҳокимияти томонидан расмий кўча номи ва уй рақами берилиши.',
-      ru: 'Официальное присвоение наименования улицы и номера дома через адресный реестр.',
-    ),
-    duration: MultiLangText(uz: '3 ish kuni', kr: '3 иш куни', ru: '3 раб. дня'),
-    cost: MultiLangText(uz: 'Bepul', kr: 'Бепул', ru: 'Бесплатно'),
-    warningTip: MultiLangText(
-      uz: 'Ko‘cha nomi o‘zgarganda barcha hujjatlarni almashtirish shart emas.',
-      kr: 'Кўча номи ўзгарганда барча ҳужжатларни алмаштириш шарт эмас.',
-      ru: 'При переименовании улиц замена всех документов не требуется.',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Kadastr pasporti',
-          kr: 'Кадастр паспорти',
-          ru: 'Кадастровый паспорт',
-        ),
-        officialName: MultiLangText(
-          uz: 'Uy kadastr yig‘majildi',
-          kr: 'Уй кадастр йиғмажилди',
-          ru: 'Кадастровое дело объекта',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Uyning koordinatasi ko‘rsatilgan hujjat.',
-          kr: 'Уйнинг координатаси кўрсатилган ҳужжат.',
-          ru: 'Документ с географическими координатами дома.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Joylashuv xaritasi.',
-          kr: '• Жойлашув харитаси.',
-          ru: '• Карта расположения.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'Mulkdorning qo‘lida bo‘ladi.',
-          kr: 'Мулкдорнинг қўлида бўлади.',
-          ru: 'На руках у собственника.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Mahalladan ko‘cha nomi haqida spravka', kr: 'Маҳалладан кўча номи ҳақида справка', ru: 'Справка об адресе из махалли'),
-    ],
-  ),
-
-  // 18
-  KadastrService(
-    id: '18',
-    icon: Icons.warning_amber,
-    titleSimple: MultiLangText(
-      uz: 'Uy buzilishga (Snos) tushganligini aniqlash',
-      kr: 'Уй бузилишга (Снос) тушганлигини аниқлаш',
-      ru: 'Проверка объекта на попадание под снос (Снос)',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Bosh rejaga asosan uy buzilishga tushganligi to‘g‘risida maʼlumotnoma',
-      kr: 'Бош режага асосан уй бузилишга тушганлиги тўғрисида маълумотнома',
-      ru: 'Справка о нахождении объекта в зоне сноса по генплану',
-    ),
-    category: MultiLangText(uz: 'Maʼlumot', kr: 'Маълумот', ru: 'Справка'),
-    purpose: MultiLangText(
-      uz: 'Shahar bosh rejasiga ko‘ra uy o‘rnida yo‘l yoki ko‘prik tushishini oldindan aniqlash.',
-      kr: 'Шаҳар бош режасига кўра уй ўрнида йўл ёки кўприк тушишини олдиндан аниқлаш.',
-      ru: 'Проверка планов генплана относительно сноса дома перед заключением сделки.',
-    ),
-    duration: MultiLangText(uz: '3 ish kuni', kr: '3 иш куни', ru: '3 раб. дня'),
-    cost: MultiLangText(uz: 'BHMning 0.05 baravari', kr: 'БҲМнинг 0.05 баравари', ru: '0.05 БРВ'),
-    warningTip: MultiLangText(
-      uz: 'Uy sotib olishdan oldin buni tekshirish firibgarlardan asraydi!',
-      kr: 'Уй сотиб олишдан олдин буни текшириш фирибгарлардан асрайди!',
-      ru: 'Обязательно проверяйте справку перед покупкой недвижимости!',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Kadastr raqami',
-          kr: 'Кадастр рақами',
-          ru: 'Кадастровый номер',
-        ),
-        officialName: MultiLangText(
-          uz: 'Obyekt kadastr raqami',
-          kr: 'Объект кадастр рақами',
-          ru: 'Кадастровый номер строения',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Uyning raqami.',
-          kr: 'Уйнинг рақами.',
-          ru: 'Номер объекта.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Joylashuvi.',
-          kr: '• Жойлашуви.',
-          ru: '• Локация.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'Pasportdan olinadi.',
-          kr: 'Паспортдан олинади.',
-          ru: 'Из паспорта.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Arxitektura bo‘limiga borib imzo to‘plash', kr: 'Архитектура бўлимига бориб имзо тўплаш', ru: 'Сбор подписей в отделе архитектуры'),
-    ],
-  ),
-
-  // 19
-  KadastrService(
-    id: '19',
-    icon: Icons.delete_forever,
-    titleSimple: MultiLangText(
-      uz: 'Mulk buzilganda kadastr hisobidan chiqarish',
-      kr: 'Мулк бузилганда кадастр ҳисобидан чиқариш',
-      ru: 'Снятие с кадастрового учета при сносе здания',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Ko‘chmas mulkka bo‘lgan huquqning bekor qilinganligini ro‘yxatdan o‘tkazish',
-      kr: 'Кўчмас мулкка бўлган ҳуқуқнинг бекор қилинганлигини рўйхатдан ўтказиш',
-      ru: 'Госрегистрация прекращения прав на недвижимое имущество',
-    ),
-    category: MultiLangText(uz: 'Ro‘yxat', kr: 'Рўйхат', ru: 'Реестр'),
-    purpose: MultiLangText(
-      uz: 'Eski uy buzilib o‘rniga yangi qurilayotganda eski uyni bazadan o‘chirish.',
-      kr: 'Эски уй бузилиб ўрнига янги қурилаётганда эски уйни базадан ўчириш.',
-      ru: 'Аннулирование старого кадастрового номера при сносе или уничтожении строения.',
-    ),
-    duration: MultiLangText(uz: '2 ish kuni', kr: '2 иш куни', ru: '2 раб. дня'),
-    cost: MultiLangText(uz: 'BHMning 0.5 baravari', kr: 'БҲМнинг 0.5 баравари', ru: '0.5 БРВ'),
-    warningTip: MultiLangText(
-      uz: 'Buzilgan uyni bazadan chiqarmasangiz, yo‘q uy uchun soliq hisoblanaveradi!',
-      kr: 'Бузилган уйни базадан чиқармасангиз, йўқ уй учун солиқ ҳисобланаверади!',
-      ru: 'Если не снять снесенный дом с учета, налог на имущество будет начисляться дальше!',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Buzilganlik dalolatnomasi',
-          kr: 'Бузилганлик далолатномаси',
-          ru: 'Акт об отсутствии строения',
-        ),
-        officialName: MultiLangText(
-          uz: 'Bino mavjud emasligi to‘g‘risidagi dalolatnoma',
-          kr: 'Бино мавжуд эмаслиги тўғрисидаги далолатнома',
-          ru: 'Акт подтверждения сноса объекта',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Uy haqiqatda yo‘qligini tasdiqlovchi dalolatnoma.',
-          kr: 'Уй ҳақиқатда йўқлигини тасдиқловчи далолатнома.',
-          ru: 'Акт комиссии об отсутствии строения на участке.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Mahalla va kadastr imzolari.',
-          kr: '• Маҳалла ва кадастр имзолари.',
-          ru: '• Подписи инспектора и махалли.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'Tuman kadastri va mahalladan.',
-          kr: 'Туман кадастри ва маҳалладан.',
-          ru: 'В районном филиале кадастра и махалле.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Eski orderlarni arxivdan qayta talab qilish', kr: 'Эски ордерларни архивдан қайта талаб қилиш', ru: 'Повторный запрос старых архивных ордеров'),
-    ],
-  ),
-
-  // 20
-  KadastrService(
-    id: '20',
-    icon: Icons.map,
-    titleSimple: MultiLangText(
-      uz: 'Topografik va geodezik xaritalar olish',
-      kr: 'Топографик ва геодезик хариталар олиш',
-      ru: 'Предоставление геодезических и топографических карт',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Davlat kartografiya-geodeziya fondidan maʼlumotlar taqdim etish',
-      kr: 'Давлат картография-геодезия фондидан маълумотлар тақдим этиш',
-      ru: 'Предоставление пространственных геодезических материалов фонда',
-    ),
-    category: MultiLangText(uz: 'Geodeziya', kr: 'Геодезия', ru: 'Геодезия'),
-    purpose: MultiLangText(
-      uz: 'Katta inshootlar yoki yo‘l loyihalari uchun aniq xaritalar olish.',
-      kr: 'Катта иншоотлар ёки йўл лойиҳалари учун аниқ хариталар олиш.',
-      ru: 'Получение точных карт 1:500 для проектирования капитальных объектов.',
-    ),
-    duration: MultiLangText(uz: '5 ish kuni', kr: '5 иш куни', ru: '5 раб. дней'),
-    cost: MultiLangText(uz: 'Masshtabiga qarab', kr: 'Масштабига қараб', ru: 'Согласно масштабу съемки'),
-    warningTip: MultiLangText(
-      uz: 'Geodezik maʼlumotsiz qurilish yer osti quvurlariga xavf tug‘diradi.',
-      kr: 'Геодезик маълумотсиз қурилиш ер ости қувурларига хавф туғдиради.',
-      ru: 'Строительство без геодезии несет риск повреждения подземных коммуникаций.',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Loyiha topshirig‘i',
-          kr: 'Лойиҳа топшириғи',
-          ru: 'Техзадание проекта',
-        ),
-        officialName: MultiLangText(
-          uz: 'Tashkilot buyurtmasi',
-          kr: 'Ташкилот буюртмаси',
-          ru: 'Официальный запрос проектной организации',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Xarita talabi.',
-          kr: 'Харита талаби.',
-          ru: 'Запрос параметров.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Koordinatalar va masshtab.',
-          kr: '• Координаталар ва масштаб.',
-          ru: '• Координаты и масштаб.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'Loyiha institutidan.',
-          kr: 'Лойиҳа институтидан.',
-          ru: 'В проектном бюро.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Nolitsenzion vositachilardan xizmat olish', kr: 'Нолицензион воситачилардан хизмат олиш', ru: 'Принуждение к услугам нелицензированных посредников'),
-    ],
-  ),
-
-  // 21
-  KadastrService(
-    id: '21',
-    icon: Icons.domain_verification,
-    titleSimple: MultiLangText(
-      uz: 'Bino ostidagi yerni xususiylashtirish (Sotib olish)',
-      kr: 'Бино остидаги ерни хусусийлаштириш (Сотиб олиш)',
-      ru: 'Приватизация земельного участка под собственным зданием',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'Qishloq xo‘jaligiga mo‘ljallanmagan yer uchastkalarini xususiylashtirish',
-      kr: 'Қишлоқ хўжалигига мўлжалланмаган ер участкаларини хусусийлаштириш',
-      ru: 'Приватизация земельных участков несельскохозяйственного назначения',
-    ),
-    category: MultiLangText(uz: 'Xususiy', kr: 'Хусусий', ru: 'Приватизация'),
-    purpose: MultiLangText(
-      uz: 'O‘zingizga qarashli xususiy bino turgan yerni bir umrlik xususiy mulk qilib sotib olish.',
-      kr: 'Ўзингизга қарашли хусусий бино турган ерни бир умрлик хусусий мулк қилиб сотиб олиш.',
-      ru: 'Выкуп земельного участка под частным зданием в бессрочную частную собственность.',
-    ),
-    duration: MultiLangText(uz: '10 ish kuni', kr: '10 иш куни', ru: '10 раб. дней'),
-    cost: MultiLangText(uz: 'Yer solig‘ining karrali stavkasida', kr: 'Ер солиғининг каррали ставкасида', ru: 'По кратной ставке земельного налога'),
-    warningTip: MultiLangText(
-      uz: 'Xususiylashtirilgan yer — daxlsiz xususiy mulk bo‘ladi!',
-      kr: 'Хусусийлаштирилган ер — дахлсиз хусусий мулк бўлади!',
-      ru: 'Приватизированный участок становится неприкосновенной частной собственностью!',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Bino mulkdorlik hujjati',
-          kr: 'Бино мулкдорлик ҳужжати',
-          ru: 'Свидетельство на строение',
-        ),
-        officialName: MultiLangText(
-          uz: 'Bino kadastr pasporti va ko‘chirmasi',
-          kr: 'Бино кадастр паспорти ва кўчирмаси',
-          ru: 'Кадастровый паспорт и выписка на здание',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Bino sizniki ekani hujjati.',
-          kr: 'Бино сизники экани ҳужжати.',
-          ru: 'Подтверждение собственности на здание.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• Maydon va kadastr raqami.',
-          kr: '• Майдон ва кадастр рақами.',
-          ru: '• Площадь и кадастровый номер.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'Kadastr reyestridan.',
-          kr: 'Кадастр реестридан.',
-          ru: 'Из реестра кадастра.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Hokimning alohida yozma ruxsati', kr: 'Ҳокимнинг алоҳида ёзма рухсати', ru: 'Отдельное письменное разрешение хокима'),
-    ],
-  ),
-
-  // 22
-  KadastrService(
-    id: '22',
-    icon: Icons.shield,
-    titleSimple: MultiLangText(
-      uz: 'Hujjatsiz uylarni qonuniylashtirish (O‘RQ-937 Qonuni)',
-      kr: 'Ҳужжатсиз уйларни қонунийлаштириш (ЎРҚ-937 Қонуни)',
-      ru: 'Признание прав на самовольно занятые участки и жилье (ЗРУ-937)',
-    ),
-    titleOfficial: MultiLangText(
-      uz: 'O‘zboshimchalik bilan egallangan yer va binolarga huquqlarni eʼtirof etish (05.08.2024 yildagi O‘RQ-937-son Qonun)',
-      kr: 'Ўзбошимчалик билан эгалланган ер ва биноларга ҳуқуқларни эътироф этиш (05.08.2024 йилдаги ЎРҚ-937-сон Қонун)',
-      ru: 'Признание прав на самовольные участки и постройки (Закон ЗРУ-937 от 05.08.2024)',
-    ),
-    category: MultiLangText(uz: 'Amnistiya', kr: 'Амнистия', ru: 'Амнистия'),
-    purpose: MultiLangText(
-      uz: 'Ko‘p yillardan beri yashab kelayotgan hujjatsiz uylarga qonuniy kadastr pasporti va mulk huquqini rasmiylashtirish.',
-      kr: 'Кўп йиллардан бери яшаб келаётган ҳужжатсиз уйларга қонуний кадастр паспорти ва мулк ҳуқуқини расмийлаштириш.',
-      ru: 'Законное оформление кадастра и прав собственности на жилые дома без документов по Закону ЗРУ-937.',
-    ),
-    duration: MultiLangText(uz: 'Xatlov reja-jadvali asosida', kr: 'Хатлов режа-жадвали асосида', ru: 'По графику сплошной инвентаризации'),
-    cost: MultiLangText(uz: 'Qonunda belgilangan bir martalik to‘lov (BHMda)', kr: 'Қонунда белгиланган бир марталик тўлов (БҲМда)', ru: 'Разовый законный сбор согласно Закону'),
-    warningTip: MultiLangText(
-      uz: 'OGOH BO‘LING: Hech kimga "men uyingizni amnistiyaga kiritib beraman" degan maklerlarga pul bermang! Hududlar kadastr xodimlari tomonidan bepul xatlov qilinadi!',
-      kr: 'ОГОҲ БЎЛИНГ: Ҳеч кимга "уйингизни амнистияга киритиб бераман" деган маклерларга пул берманг! Ҳудудлар кадастр ходимлари томонидан бепул хатлов қилинади!',
-      ru: 'ВНИМАНИЕ: Не платите маклерам за "ускорение"! Инвентаризация проводится сотрудниками кадастра по махаллям бесплатно!',
-    ),
-    docs: [
-      RequiredDocument(
-        simpleName: MultiLangText(
-          uz: 'Yillar davomidagi to‘lov cheklari',
-          kr: 'Йиллар давомидаги тўлов чеклари',
-          ru: 'Многолетние квитанции об оплате налогов и услуг',
-        ),
-        officialName: MultiLangText(
-          uz: 'Yer/mulk solig‘i, elektr, gaz, suv to‘lov kvitansiyalari',
-          kr: 'Ер/мулк солиғи, электр, газ, сув тўлов квитанциялари',
-          ru: 'Чеки об уплате земельного/имущественного налога, коммунальных услуг',
-        ),
-        whatIsIt: MultiLangText(
-          uz: 'Ushbu joyda ko‘p yildan beri yashayotganingiz isboti.',
-          kr: 'Ушбу жойда кўп йилдан бери яшаётганингиз исботи.',
-          ru: 'Подтверждение фактического владения домом на протяжении многих лет.',
-        ),
-        insideContent: MultiLangText(
-          uz: '• To‘lovchi F.I.Sh. va to‘lov sanasi.',
-          kr: '• Тўловчи Ф.И.Ш. ва тўлов санаси.',
-          ru: '• Ф.И.О. плательщика и архивные даты оплаты.',
-        ),
-        whereToGet: MultiLangText(
-          uz: 'Shaxsiy arxivdan yoki kommunal bazalardan.',
-          kr: 'Шахсий архивдан ёки коммунал базалардан.',
-          ru: 'Из домашних квитанций или баз коммунальных служб.',
-        ),
-      ),
-    ],
-    illegalDemands: [
-      MultiLangText(uz: 'Vositachilik haqlari', kr: 'Воситачилик ҳақлари', ru: 'Плата за посредничество'),
-      MultiLangText(uz: 'Norasmiy pul yig‘ishlar', kr: 'Норасмий пул йиғишлар', ru: 'Неофициальные сборы комиссии'),
+      MultiLangText(uz: 'Soliqdan qarz yo‘qligi spravkasi', kr: 'Солиқдан қарз йўқлиги справкаси', ru: 'Справка об отсутствии задолженности по налогам'),
     ],
   ),
 ];
 
-// ---------------- SODDA HUJJATLAR QOMUSI ----------------
-class DocVocabulary {
-  final MultiLangText term;
-  final MultiLangText simpleExplanation;
-  final MultiLangText whatIsInside;
-  final MultiLangText whereToFind;
-
-  DocVocabulary({
-    required this.term,
-    required this.simpleExplanation,
-    required this.whatIsInside,
-    required this.whereToFind,
-  });
-}
-
-final List<DocVocabulary> allVocabularies = [
-  DocVocabulary(
-    term: MultiLangText(
-      uz: 'Hokim Qarori (Qaror nima?)',
-      kr: 'Ҳоким Қарори (Қарор нима?)',
-      ru: 'Решение хокима (Что это такое?)',
-    ),
-    simpleExplanation: MultiLangText(
-      uz: 'Tuman yoki shahar hokimi tomonidan fuqaroga yer ajratish, uy qurishga ruxsat berish haqida chiqarilgan rasmiy davlat hujjati.',
-      kr: 'Туман ёки шаҳар ҳокими томонидан фуқарога ер ажратиш, уй қуришга рухсат бериш ҳақида чиқарилган расмий давлат ҳужжати.',
-      ru: 'Распорядительный акт главы района о выделении участка или разрешении строительства (новые решения отменены, действуют архивные).',
-    ),
-    whatIsInside: MultiLangText(
-      uz: '• Hokim imzosi, sana va dumaloq gerbli muhr;\n• Kimga, qancha yer va qanday maqsadda berilgani.',
-      kr: '• Ҳоким имзоси, сана ва думалоқ гербли муҳр;\n• Кимга, қанча ер ва қандай мақсадда берилгани.',
-      ru: '• Подпись хокима, гербовая печать, дата;\n• Ф.И.О., площадь и целевое назначение участка.',
-    ),
-    whereToFind: MultiLangText(
-      uz: 'Tuman hokimligi devonxonasidan yoki viloyat davlat arxividan.',
-      kr: 'Туман ҳокимлиги девонхонасидан ёки вилоят давлат архивидан.',
-      ru: 'В канцелярии хокимията или областном госархиве.',
-    ),
-  ),
-  DocVocabulary(
-    term: MultiLangText(
-      uz: 'Oldi-sotdi shartnomasi nima?',
-      kr: 'Олди-сотди шартномаси нима?',
-      ru: 'Договор купли-продажи (Что это?)',
-    ),
-    simpleExplanation: MultiLangText(
-      uz: 'Uyni sotib olganingizda notarius ishtirokida imzolanadigan eng asosiy gerbli hujjat.',
-      kr: 'Уйни сотиб олганингизда нотариус иштирокида имзоланадиган энг асосий гербли ҳужжат.',
-      ru: 'Основной документ о покупке жилья, удостоверяемый государственным или частным нотариусом.',
-    ),
-    whatIsInside: MultiLangText(
-      uz: '• Sotuvchi va xaridor pasportlari;\n• Mulkning summasi, manzili va notarius muhri.',
-      kr: '• Сотувчи ва харидор паспортлари;\n• Мулкнинг суммаси, манзили ва нотариус муҳри.',
-      ru: '• Паспортные данные сторон, сумма сделки, адрес и печать нотариуса.',
-    ),
-    whereToFind: MultiLangText(
-      uz: 'Bitim tuzilgan notarial idoradan (dublikati olinishi mumkin).',
-      kr: 'Битим тузилган нотариал идорадан (дубликати олиниши мумкин).',
-      ru: 'В нотариальной конторе оформления (выдается дубликат).',
-    ),
-  ),
-  DocVocabulary(
-    term: MultiLangText(
-      uz: 'APZ (Arxitektura topshirig‘i) nima?',
-      kr: 'АПЗ (Архитектура топшириғи) нима?',
-      ru: 'АПЗ (Архитектурно-планировочное задание)',
-    ),
-    simpleExplanation: MultiLangText(
-      uz: 'Qurilish boshlashdan oldin arxitektura bo‘limi beradigan qonuniy meʼyorlar hujjati (qavatlar soni, qizil chiziqlar).',
-      kr: 'Қурилиш бошлашдан олдин архитектура бўлими берадиган қонуний меъёрлар ҳужжати (қаватлар сони, қизил чизиқлар).',
-      ru: 'Градостроительный документ перед стройкой с требованиями по этажности и границам застройки.',
-    ),
-    whatIsInside: MultiLangText(
-      uz: '• Qavatlar soni, chegaradan qoldiriladigan metrlar va kommunikatsiya shartlari.',
-      kr: '• Қаватлар сони, чегарадан қолдириладиган метрлар ва коммуникация шартлари.',
-      ru: '• Предельная этажность, отступы от границ участка и техусловия сетей.',
-    ),
-    whereToFind: MultiLangText(
-      uz: 'my.gov.uz portali orqali tuman Qurilish va arxitektura bo‘limidan.',
-      kr: 'my.gov.uz портали орқали туман Қурилиш ва архитектура бўлимидан.',
-      ru: 'Через портал my.gov.uz из районного отдела архитектуры и строительства.',
-    ),
-  ),
-  DocVocabulary(
-    term: MultiLangText(
-      uz: 'Mulk ko‘chirmasi (Vipiska) nima?',
-      kr: 'Мулк кўчирмаси (Виписка) нима?',
-      ru: 'Выписка из госреестра (Что это?)',
-    ),
-    simpleExplanation: MultiLangText(
-      uz: 'Eski ko‘k guvohnoma o‘rniga beriladigan yagona QR-kodli elektron davlat hujjati.',
-      kr: 'Эски кўк гувоҳнома ўрнига бериладиган ягона QR-кодли электрон давлат ҳужжати.',
-      ru: 'Электронный документ с QR-кодом, заменивший старые бумажные свидетельства.',
-    ),
-    whatIsInside: MultiLangText(
-      uz: '• Kadastr raqami, hozirgi qonuniy mulkdor va QR-kod.',
-      kr: '• Кадастр рақами, ҳозирги қонуний мулкдор ва QR-код.',
-      ru: '• Кадастровый номер, имя законного владельца и QR-код подлинности.',
-    ),
-    whereToFind: MultiLangText(
-      uz: 'my.gov.uz orqali yoki Davlat xizmatlari markazidan (DXM).',
-      kr: 'my.gov.uz орқали ёки Давлат хизматлари марказидан (ДХМ).',
-      ru: 'Через my.gov.uz или в Центре госуслуг (ЦГУ).',
-    ),
-  ),
-];
-
-// ---------------- BOSH SAHIFA ----------------
-class HomeScreen extends StatefulWidget {
+// ---------------- 1-BOSH SAHIFA: TOIFALAR (TIPLARI) TANLOVI ----------------
+class CategorySelectionScreen extends StatelessWidget {
   final AppLanguage currentLanguage;
   final Function(AppLanguage) onLanguageChanged;
 
-  const HomeScreen({
+  const CategorySelectionScreen({
     super.key,
     required this.currentLanguage,
     required this.onLanguageChanged,
   });
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  String _searchQuery = '';
-
-  @override
   Widget build(BuildContext context) {
-    final lang = widget.currentLanguage;
-
-    final filtered = allKadastrServices.where((s) {
-      final text = '${s.titleSimple.get(lang)} ${s.titleOfficial.get(lang)}'.toLowerCase();
-      return text.contains(_searchQuery.toLowerCase());
-    }).toList();
+    final lang = currentLanguage;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B3C7B),
-        elevation: 2,
+        backgroundColor: const Color(0xFF08336E),
+        elevation: 3,
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
-          lang == AppLanguage.russian
-              ? 'Осон Кадастр'
-              : (lang == AppLanguage.uzbekCyrillic ? 'Осон Кадастр' : 'Oson Kadastr'),
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 21),
+          lang == AppLanguage.russian ? 'Осон Кадастр' : (lang == AppLanguage.uzbekCyrillic ? 'Осон Кадастр' : 'Oson Kadastr'),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 22),
         ),
         actions: [
-          // TIL ALMASHTIRISH TUGMASI
           PopupMenuButton<AppLanguage>(
-            icon: const Icon(Icons.language, color: Colors.white, size: 26),
-            tooltip: 'Tilni tanlash / Выбор языка',
-            onSelected: widget.onLanguageChanged,
+            icon: const Icon(Icons.language, color: Colors.white, size: 28),
+            onSelected: onLanguageChanged,
             itemBuilder: (ctx) => [
               const PopupMenuItem(
                 value: AppLanguage.uzbekLatin,
-                child: Text('🇺🇿 O‘zbekcha (Lotin)', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: Text('🇺🇿 O‘zbekcha (Lotin)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               ),
               const PopupMenuItem(
                 value: AppLanguage.uzbekCyrillic,
-                child: Text('🇺🇿 Ўзбекча (Кирилл)', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: Text('🇺🇿 Ўзбекча (Кирилл)', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               ),
               const PopupMenuItem(
                 value: AppLanguage.russian,
-                child: Text('🇷🇺 Русский', style: TextStyle(fontWeight: FontWeight.bold)),
+                child: Text('🇷🇺 Русский', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
               ),
             ],
           ),
           IconButton(
-            icon: const Icon(Icons.calculate, color: Colors.white, size: 26),
-            tooltip: 'Kalkulyator',
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => CalculatorScreen(lang: lang)));
-            },
+            icon: const Icon(Icons.calculate, color: Colors.white, size: 28),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CalculatorScreen(lang: lang))),
           ),
           IconButton(
-            icon: const Icon(Icons.info_outline, color: Colors.white, size: 26),
-            onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => AboutScreen(lang: lang)));
-            },
+            icon: const Icon(Icons.info_outline, color: Colors.white, size: 28),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AboutScreen(lang: lang))),
           ),
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            UserAccountsDrawerHeader(
-              decoration: const BoxDecoration(color: Color(0xFF0B3C7B)),
-              accountName: Text(
-                lang == AppLanguage.russian ? 'Осон Кадастр' : (lang == AppLanguage.uzbekCyrillic ? 'Осон Кадастр' : 'Oson Kadastr'),
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-              ),
-              accountEmail: Text(
-                lang == AppLanguage.russian
-                    ? 'Антикоррупционный правовой навигатор'
-                    : (lang == AppLanguage.uzbekCyrillic ? 'Коррупцияга қарши ҳуқуқий навигатор' : 'Korrupsiyaga qarshi huquqiy yo‘riqnoma'),
-                style: const TextStyle(fontSize: 13),
-              ),
-              currentAccountPicture: const CircleAvatar(
-                backgroundColor: Colors.white,
-                child: Icon(Icons.shield, color: Color(0xFF0B3C7B), size: 42),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.menu_book, color: Color(0xFF0B3C7B), size: 26),
-              title: Text(
-                lang == AppLanguage.russian ? 'Словарь документов' : (lang == AppLanguage.uzbekCyrillic ? 'Ҳужжатлар қомуси' : 'Hujjatlar nima? (Qomus)'),
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (_) => VocabularyScreen(lang: lang)));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.calculate, color: Colors.teal, size: 26),
-              title: Text(
-                lang == AppLanguage.russian ? 'Калькулятор госпошлины' : (lang == AppLanguage.uzbekCyrillic ? 'Давлат божи калькулятори' : 'Davlat boji kalkulyatori'),
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (_) => CalculatorScreen(lang: lang)));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.fact_check, color: Colors.orange, size: 26),
-              title: Text(
-                lang == AppLanguage.russian ? 'Тест: Амнистия (ЗРУ-937)' : (lang == AppLanguage.uzbekCyrillic ? 'Амнистия тести (ЎРҚ-937)' : 'Amnistiya testi (O‘RQ-937)'),
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (_) => AmnestyTestScreen(lang: lang)));
-              },
-            ),
-            ListTile(
-              leading: const Icon(Icons.warning, color: Colors.red, size: 26),
-              title: Text(
-                lang == AppLanguage.russian ? 'Столкнулись с коррупцией?' : (lang == AppLanguage.uzbekCyrillic ? 'Коррупцияга дуч келсангиз' : 'Korrupsiyaga duch kelsangiz'),
-                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.red),
-              ),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (_) => CorruptionHelpScreen(lang: lang)));
-              },
-            ),
-            const Divider(),
-            ListTile(
-              leading: const Icon(Icons.phone_in_talk, color: Colors.green, size: 26),
-              title: Text(
-                lang == AppLanguage.russian ? 'Колл-центр Агентства: 1097' : (lang == AppLanguage.uzbekCyrillic ? 'Агентлик Ишонч телефони: 1097' : 'Kadastr Call-markazi: 1097'),
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.person, color: Colors.blueGrey, size: 26),
-              title: const Text('Muxriddin Elbegiyev', style: TextStyle(fontWeight: FontWeight.bold)),
-              subtitle: const Text('+998 33 911 22 22'),
-              onTap: () {
-                Navigator.pop(context);
-                Navigator.push(context, MaterialPageRoute(builder: (_) => AboutScreen(lang: lang)));
-              },
-            ),
-          ],
-        ),
-      ),
-      body: Column(
+      body: ListView(
+        padding: const EdgeInsets.all(16),
         children: [
-          // QIDIRUV MAYDONI
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 14, 14, 6),
-            child: TextField(
-              style: const TextStyle(fontSize: 16),
-              decoration: InputDecoration(
-                hintText: lang == AppLanguage.russian
-                    ? 'Поиск услуги или документа...'
-                    : (lang == AppLanguage.uzbekCyrillic ? 'Хизмат ёки ҳужжатни қидиринг...' : 'Xizmat yoki hujjatni qidiring...'),
-                prefixIcon: const Icon(Icons.search, color: Color(0xFF0B3C7B), size: 26),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(vertical: 14),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide.none),
+          // YUQORI MAQSADLI BANNER
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              gradient: const LinearGradient(
+                colors: [Color(0xFF08336E), Color(0xFF0D47A1)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              onChanged: (val) => setState(() => _searchQuery = val),
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(color: Colors.blue.shade900.withOpacity(0.3), blurRadius: 8, offset: const Offset(0, 4)),
+              ],
             ),
-          ),
-
-          // TEZKOR BO‘LIMLAR TUGMALARI
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildQuickAction(
-                  icon: Icons.calculate,
-                  label: lang == AppLanguage.russian ? 'Калькулятор' : (lang == AppLanguage.uzbekCyrillic ? 'Калькулятор' : 'Kalkulyator'),
-                  color: Colors.teal.shade700,
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CalculatorScreen(lang: lang))),
+                Row(
+                  children: [
+                    const Icon(Icons.shield, color: Color(0xFF64B5F6), size: 30),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        lang == AppLanguage.russian ? 'Антикоррупционный гид' : 'Korrupsiyaga qarshi huquqiy qalqon',
+                        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(width: 8),
-                _buildQuickAction(
-                  icon: Icons.fact_check,
-                  label: lang == AppLanguage.russian ? 'Тест ЗРУ-937' : (lang == AppLanguage.uzbekCyrillic ? 'Тест ЎРҚ-937' : 'Test O‘RQ-937'),
-                  color: Colors.deepOrange.shade700,
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AmnestyTestScreen(lang: lang))),
-                ),
-                const SizedBox(width: 8),
-                _buildQuickAction(
-                  icon: Icons.shield,
-                  label: lang == AppLanguage.russian ? 'Антикоррупция' : (lang == AppLanguage.uzbekCyrillic ? 'Антикоррупция' : 'Antikorrupsiya'),
-                  color: Colors.red.shade800,
-                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CorruptionHelpScreen(lang: lang))),
+                const SizedBox(height: 10),
+                Text(
+                  lang == AppLanguage.russian
+                      ? 'Выберите категорию услуги, чтобы узнать: какие документы нужны, где их получить, когда обращаться в архитектуру и сколько платить по закону.'
+                      : 'Kerakli xizmat turini tanlang: qanday hujjatlar kerak, Arxitektura va qurilish bo‘limi qachon talab etiladi va davlat boji qancha ekanini bilib oling.',
+                  style: const TextStyle(color: Colors.white70, fontSize: 14, height: 1.4),
                 ),
               ],
             ),
           ),
 
-          // RO‘YXAT
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(14),
+          const SizedBox(height: 18),
+
+          Text(
+            lang == AppLanguage.russian ? 'КАТЕГОРИИ УСЛУГ' : (lang == AppLanguage.uzbekCyrillic ? 'ХИЗМАТ ТУРЛАРИ' : 'XIZMATLAR TURLARI (KATEGORIYALARI)'),
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1E293B), letterSpacing: 0.8),
+          ),
+          const SizedBox(height: 10),
+
+          // 6 TA TOIFA KARTALARI
+          ...serviceCategories.map((cat) {
+            return Card(
+              elevation: 2.5,
+              margin: const EdgeInsets.only(bottom: 14),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(16),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ServicesListScreen(category: cat, lang: lang),
+                    ),
+                  );
+                },
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 58,
+                        height: 58,
+                        decoration: BoxDecoration(
+                          color: cat.color.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Icon(cat.icon, color: cat.color, size: 32),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              cat.title.get(lang),
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 17, color: Color(0xFF0F172A)),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              cat.description.get(lang),
+                              style: TextStyle(fontSize: 13, color: Colors.grey.shade700, height: 1.3),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const Icon(Icons.arrow_forward_ios, size: 18, color: Colors.grey),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+// ---------------- 2-EKRAN: TOIFA ICHIDAGI XIZMATLAR RO‘YXATI ----------------
+class ServicesListScreen extends StatelessWidget {
+  final ServiceCategory category;
+  final AppLanguage lang;
+
+  const ServicesListScreen({super.key, required this.category, required this.lang});
+
+  @override
+  Widget build(BuildContext context) {
+    final filtered = allServices.where((s) => s.categoryId == category.id).toList();
+
+    return Scaffold(
+      backgroundColor: const Color(0xFFF1F5F9),
+      appBar: AppBar(
+        backgroundColor: category.color,
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: Text(
+          category.title.get(lang),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 18),
+        ),
+      ),
+      body: filtered.isEmpty
+          ? Center(
+              child: Text(
+                lang == AppLanguage.russian ? 'В этой категории обновляются данные' : 'Ushbu toifadagi maʼlumotlar yangilanmoqda',
+                style: const TextStyle(fontSize: 16),
+              ),
+            )
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
               itemCount: filtered.length,
               itemBuilder: (context, i) {
                 final item = filtered[i];
@@ -1829,15 +933,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   margin: const EdgeInsets.only(bottom: 12),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                   child: ListTile(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    leading: Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFE8EEF7),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Icon(item.icon, color: const Color(0xFF0B3C7B), size: 28),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    leading: CircleAvatar(
+                      radius: 24,
+                      backgroundColor: category.color.withOpacity(0.12),
+                      child: Icon(item.icon, color: category.color, size: 28),
                     ),
                     title: Text(
                       item.titleSimple.get(lang),
@@ -1849,51 +949,39 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 4),
                         Text(
                           item.titleOfficial.get(lang),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontStyle: FontStyle.italic),
+                          style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontStyle: FontStyle.italic),
                         ),
                         const SizedBox(height: 6),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                          decoration: BoxDecoration(color: Colors.blue.shade50, borderRadius: BorderRadius.circular(6)),
-                          child: Text(
-                            '${lang == AppLanguage.russian ? "Срок" : (lang == AppLanguage.uzbekCyrillic ? "Муддати" : "Muddati")}: ${item.duration.get(lang)}',
-                            style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF0B3C7B)),
-                          ),
+                        Row(
+                          children: [
+                            const Icon(Icons.timer, size: 16, color: Colors.blueGrey),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                item.duration.get(lang),
+                                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.blueGrey),
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                    trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Color(0xFF0B3C7B)),
+                    trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.blueGrey),
                     onTap: () {
-                      Navigator.push(context, MaterialPageRoute(builder: (_) => DetailScreen(service: item, lang: lang)));
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => DetailScreen(service: item, lang: lang)),
+                      );
                     },
                   ),
                 );
               },
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuickAction({required IconData icon, required String label, required Color color, required VoidCallback onTap}) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-      icon: Icon(icon, size: 18),
-      label: Text(label, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold)),
-      onPressed: onTap,
     );
   }
 }
 
-// ---------------- TAFSILOTLAR EKRANI ----------------
+// ---------------- 3-EKRAN: XIZMATNING TO‘LIQ HUQUQIY VA ARXITEKTURA TAFSILOTI ----------------
 class DetailScreen extends StatelessWidget {
   final KadastrService service;
   final AppLanguage lang;
@@ -1920,7 +1008,7 @@ class DetailScreen extends StatelessWidget {
                 children: [
                   const CircleAvatar(
                     backgroundColor: Color(0xFFE8F5E9),
-                    child: Icon(Icons.assignment, color: Colors.green),
+                    child: Icon(Icons.find_in_page, color: Colors.green),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -1934,20 +1022,22 @@ class DetailScreen extends StatelessWidget {
               ),
               const Divider(height: 24),
               Text(
-                lang == AppLanguage.russian ? 'Официальное наименование:' : (lang == AppLanguage.uzbekCyrillic ? 'Расмий номи:' : 'Rasmiy nomi:'),
+                lang == AppLanguage.russian ? 'Официальное наименование:' : 'Rasmiy yuridik nomi:',
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Colors.grey),
               ),
               Text(doc.officialName.get(lang), style: const TextStyle(fontSize: 14, fontStyle: FontStyle.italic)),
               const SizedBox(height: 14),
+
               Text(
-                lang == AppLanguage.russian ? 'Что это за документ? (Простыми словами):' : (lang == AppLanguage.uzbekCyrillic ? 'Бу қандай ҳужжат? (Оддий тилда):' : 'Bu qanday hujjat? (Oddiy tilda):'),
-                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF0B3C7B)),
+                lang == AppLanguage.russian ? 'Что это за документ? (Простыми словами):' : 'Bu qanday hujjat? (Oddiy xalq tilida):',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF08336E)),
               ),
               const SizedBox(height: 4),
-              Text(doc.whatIsIt.get(lang), style: const TextStyle(fontSize: 15, height: 1.4)),
+              Text(doc.whatIsIt.get(lang), style: const TextStyle(fontSize: 14, height: 1.4)),
               const SizedBox(height: 14),
+
               Text(
-                lang == AppLanguage.russian ? 'Что обязательно должно быть внутри:' : (lang == AppLanguage.uzbekCyrillic ? 'Ичида нималар ёзилган бўлиши шарт:' : 'Hujjat ichida nimalar yozilgan bo‘lishi shart:'),
+                lang == AppLanguage.russian ? 'Что обязательно должно быть внутри:' : 'Hujjat ichida nimalar yozilgan bo‘lishi shart:',
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.deepOrange),
               ),
               const SizedBox(height: 4),
@@ -1958,24 +1048,40 @@ class DetailScreen extends StatelessWidget {
                 child: Text(doc.insideContent.get(lang), style: const TextStyle(fontSize: 14, height: 1.4)),
               ),
               const SizedBox(height: 14),
+
+              // ARXITEKTURA VA QURILISH TALABI
               Text(
-                lang == AppLanguage.russian ? 'Где получить или как восстановить:' : (lang == AppLanguage.uzbekCyrillic ? 'Қаердан олинади ёки йўқолган бўлса:' : 'Qayerdan olinadi yoki yo‘qolgan bo‘lsa:'),
+                lang == AppLanguage.russian ? 'Связь с архитектурой и строительством:' : 'Arxitektura va qurilish bo‘limi bilan bog‘liqligi:',
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF4A148C)),
+              ),
+              const SizedBox(height: 4),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(color: const Color(0xFFF3E5F5), borderRadius: BorderRadius.circular(10)),
+                child: Text(doc.arxitekturaBoglanishi.get(lang), style: const TextStyle(fontSize: 14, height: 1.4)),
+              ),
+              const SizedBox(height: 14),
+
+              Text(
+                lang == AppLanguage.russian ? 'Где взять или как восстановить:' : 'Qayerdan olasiz yoki yo‘qolgan bo‘lsa:',
                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Colors.green),
               ),
               const SizedBox(height: 4),
               Text(doc.whereToGet.get(lang), style: const TextStyle(fontSize: 14, height: 1.4)),
+
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF0B3C7B),
+                    backgroundColor: const Color(0xFF08336E),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 14),
                   ),
                   onPressed: () => Navigator.pop(ctx),
                   child: Text(
-                    lang == AppLanguage.russian ? 'Понятно' : (lang == AppLanguage.uzbekCyrillic ? 'Тушунарли' : 'Tushundim'),
+                    lang == AppLanguage.russian ? 'Понятно' : 'Tushundim',
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
@@ -1992,9 +1098,12 @@ class DetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B3C7B),
+        backgroundColor: const Color(0xFF08336E),
         iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(service.titleSimple.get(lang), style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold)),
+        title: Text(
+          service.titleSimple.get(lang),
+          style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
+        ),
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(14),
@@ -2008,7 +1117,7 @@ class DetailScreen extends StatelessWidget {
           ),
           icon: const Icon(Icons.checklist, size: 22),
           label: Text(
-            lang == AppLanguage.russian ? 'Проверить мои документы' : (lang == AppLanguage.uzbekCyrillic ? 'Ҳужжатларимни текшириш' : 'Hujjatlarim yetarlimi? Tekshirish'),
+            lang == AppLanguage.russian ? 'Проверить мои документы' : 'Hujjatlarim yetarlimi? Tekshirish',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           onPressed: () {
@@ -2026,8 +1135,8 @@ class DetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  lang == AppLanguage.russian ? 'Цель и назначение услуги:' : (lang == AppLanguage.uzbekCyrillic ? 'Хизматнинг мақсади:' : 'Bu xizmat nima uchun kerak?'),
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF0B3C7B)),
+                  lang == AppLanguage.russian ? 'Суть и назначение:' : 'Xizmat nima uchun kerak?',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF08336E)),
                 ),
                 const SizedBox(height: 6),
                 Text(service.purpose.get(lang), style: const TextStyle(fontSize: 15, height: 1.4)),
@@ -2035,10 +1144,10 @@ class DetailScreen extends StatelessWidget {
                 Row(
                   children: [
                     const Icon(Icons.timer, size: 20, color: Colors.blueGrey),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '${lang == AppLanguage.russian ? "Срок" : (lang == AppLanguage.uzbekCyrillic ? "Муддати" : "Muddati")}: ${service.duration.get(lang)}',
+                        '${lang == AppLanguage.russian ? "Срок" : "Muddati"}: ${service.duration.get(lang)}',
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                       ),
                     ),
@@ -2048,10 +1157,10 @@ class DetailScreen extends StatelessWidget {
                 Row(
                   children: [
                     const Icon(Icons.payments, size: 20, color: Colors.green),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        '${lang == AppLanguage.russian ? "Оплата" : (lang == AppLanguage.uzbekCyrillic ? "Тўлов" : "To‘lov")}: ${service.cost.get(lang)}',
+                        '${lang == AppLanguage.russian ? "Оплата" : "To‘lov"}: ${service.cost.get(lang)}',
                         style: const TextStyle(fontSize: 14),
                       ),
                     ),
@@ -2060,7 +1169,9 @@ class DetailScreen extends StatelessWidget {
               ],
             ),
           ),
+
           const SizedBox(height: 12),
+
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
@@ -2076,18 +1187,21 @@ class DetailScreen extends StatelessWidget {
                 Expanded(
                   child: Text(
                     service.warningTip.get(lang),
-                    style: const TextStyle(color: Color(0xFFBF360C), fontWeight: FontWeight.bold, fontSize: 14, height: 1.3),
+                    style: const TextStyle(color: Color(0xFFBF360C), fontWeight: FontWeight.bold, fontSize: 14, height: 1.35),
                   ),
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
+
+          const SizedBox(height: 18),
+
           Text(
-            lang == AppLanguage.russian ? 'Необходимые документы (Нажмите):' : (lang == AppLanguage.uzbekCyrillic ? 'Талаб қилинадиган ҳужжатлар (Босинг):' : 'Kerakli hujjatlar (Ustiga bosing):'),
+            lang == AppLanguage.russian ? 'Необходимые документы (Нажмите для чтения):' : 'Kerakli hujjatlar ro‘yxati (Batafsil bilish uchun bosing):',
             style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 8),
+
           ...service.docs.map((d) => Card(
             elevation: 1.5,
             margin: const EdgeInsets.only(bottom: 8),
@@ -2102,17 +1216,17 @@ class DetailScreen extends StatelessWidget {
                     const CircleAvatar(
                       radius: 20,
                       backgroundColor: Color(0xFFE8EEF7),
-                      child: Icon(Icons.info, color: Color(0xFF0B3C7B), size: 22),
+                      child: Icon(Icons.assignment, color: Color(0xFF08336E), size: 22),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(d.simpleName.get(lang), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF0B3C7B))),
+                          Text(d.simpleName.get(lang), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: Color(0xFF08336E))),
                           const SizedBox(height: 2),
                           Text(
-                            '${lang == AppLanguage.russian ? "Где взять" : (lang == AppLanguage.uzbekCyrillic ? "Қаердан" : "Qayerdan")}: ${d.whereToGet.get(lang)}',
+                            '${lang == AppLanguage.russian ? "Где взять" : "Qayerdan"}: ${d.whereToGet.get(lang)}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(fontSize: 12, color: Colors.grey),
@@ -2126,7 +1240,9 @@ class DetailScreen extends StatelessWidget {
               ),
             ),
           )),
-          const SizedBox(height: 14),
+
+          const SizedBox(height: 16),
+
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(color: const Color(0xFFFFEBEE), borderRadius: BorderRadius.circular(12)),
@@ -2134,7 +1250,7 @@ class DetailScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  lang == AppLanguage.russian ? 'НЕ ИМЕЮТ ПРАВА ТРЕБОВАТЬ:' : (lang == AppLanguage.uzbekCyrillic ? 'БУЛАРНИ ТАЛАБ ҚИЛИШГА ҲАҚЛАРИ ЙЎҚ:' : 'Bularni talab qilishga HAQLARI YO‘Q:'),
+                  lang == AppLanguage.russian ? 'НЕ ИМЕЮТ ПРАВА ТРЕБОВАТЬ:' : 'Bularni talab qilishga HAQLARI YO‘Q:',
                   style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red, fontSize: 14),
                 ),
                 const SizedBox(height: 6),
@@ -2181,10 +1297,10 @@ class _CheckScreenState extends State<CheckScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B3C7B),
+        backgroundColor: const Color(0xFF08336E),
         iconTheme: const IconThemeData(color: Colors.white),
         title: Text(
-          lang == AppLanguage.russian ? 'Проверка документов' : (lang == AppLanguage.uzbekCyrillic ? 'Ҳужжатларни текшириш' : 'Hujjatlarim yetarlimi?'),
+          lang == AppLanguage.russian ? 'Проверка документов' : 'Hujjatlarim yetarlimi?',
           style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
         ),
       ),
@@ -2192,7 +1308,7 @@ class _CheckScreenState extends State<CheckScreen> {
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            lang == AppLanguage.russian ? 'Отметьте документы, имеющиеся на руках:' : (lang == AppLanguage.uzbekCyrillic ? 'Қўлингизда бор ҳужжатларни белгиланг:' : 'Qo‘lingizda bor hujjatlarni belgilang:'),
+            lang == AppLanguage.russian ? 'Отметьте документы на руках:' : 'Qo‘lingizda mavjud hujjatlarni belgilang:',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 12),
@@ -2205,7 +1321,7 @@ class _CheckScreenState extends State<CheckScreen> {
               child: CheckboxListTile(
                 value: val,
                 title: Text(doc.simpleName.get(lang), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
-                subtitle: Text('${lang == AppLanguage.russian ? "Источник" : (lang == AppLanguage.uzbekCyrillic ? "Қаердан" : "Qayerdan")}: ${doc.whereToGet.get(lang)}'),
+                subtitle: Text('Manba: ${doc.whereToGet.get(lang)}'),
                 onChanged: (newVal) => setState(() => _checked[i] = newVal ?? false),
               ),
             );
@@ -2224,23 +1340,15 @@ class _CheckScreenState extends State<CheckScreen> {
                 const SizedBox(height: 10),
                 Text(
                   isComplete
-                      ? (lang == AppLanguage.russian ? 'Документы в полном комплекте!' : (lang == AppLanguage.uzbekCyrillic ? 'Ҳужжатларингиз тўлиқ!' : 'Hujjatlaringiz to‘liq!'))
-                      : (lang == AppLanguage.russian ? 'Комплект не полный ($count / $total)' : (lang == AppLanguage.uzbekCyrillic ? 'Ҳужжатлар тўлиқ эмас ($count / $total)' : 'Hujjatlar to‘liq emas ($count / $total)')),
+                      ? (lang == AppLanguage.russian ? 'Документы полностью готовы!' : 'Hujjatlaringiz to‘liq!')
+                      : (lang == AppLanguage.russian ? 'Комплект не полный ($count / $total)' : 'Hujjatlar to‘liq emas ($count / $total)'),
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: isComplete ? Colors.green.shade900 : Colors.amber.shade900),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   isComplete
-                      ? (lang == AppLanguage.russian
-                          ? 'Вы можете подать заявление через my.gov.uz или Центр госуслуг. Никто не имеет права требовать лишних справок!'
-                          : (lang == AppLanguage.uzbekCyrillic
-                              ? 'Энди бемалол Давлат хизматлари марказига ёки my.gov.uz орқали ариза топширишингиз мумкин. Ҳеч ким сиздан ортиқча қоғоз талаб қила олмайди!'
-                              : 'Endi bemalol Davlat xizmatlari markaziga yoki my.gov.uz orqali ariza topshirishingiz mumkin. Hech kim ortiqcha qog‘oz talab qila olmaydi!'))
-                      : (lang == AppLanguage.russian
-                          ? 'Соберите недостающие документы в указанных инстанциях перед подачей заявления.'
-                          : (lang == AppLanguage.uzbekCyrillic
-                              ? 'Белгиланмаган ҳужжатларни кўрсатилган идорадан олиб, кейин мурожаат қилинг.'
-                              : 'Belgilanmagan hujjatlarni ko‘rsatilgan idoradan olib, keyin murojaat qiling.')),
+                      ? 'Endi bemalol Davlat xizmatlari markaziga yoki my.gov.uz orqali murojaat qilishingiz mumkin. Barcha qonuniy meʼyorlarga egasiz!'
+                      : 'Belgilanmagan hujjatlarni yuqorida ko‘rsatilgan idoralardan to‘liq olib, keyin murojaat qiling.',
                   textAlign: TextAlign.center,
                   style: const TextStyle(fontSize: 14, height: 1.4),
                 ),
@@ -2253,7 +1361,7 @@ class _CheckScreenState extends State<CheckScreen> {
   }
 }
 
-// ---------------- DAVLAT BOJI KALKULYATORI (YANGI VA MUKAMMAL) ----------------
+// ---------------- KALKULYATOR EKRANI ----------------
 class CalculatorScreen extends StatefulWidget {
   final AppLanguage lang;
   const CalculatorScreen({super.key, required this.lang});
@@ -2263,7 +1371,7 @@ class CalculatorScreen extends StatefulWidget {
 }
 
 class _CalculatorScreenState extends State<CalculatorScreen> {
-  final double bhm = 375000; // 2024-2026 amaldagi BHM stavkasi
+  final double bhm = 375000;
   String _selectedService = 'turar';
   final TextEditingController _areaController = TextEditingController(text: '70');
   double _calculatedSum = 0;
@@ -2278,7 +1386,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     double area = double.tryParse(_areaController.text) ?? 0;
     setState(() {
       if (_selectedService == 'turar') {
-        // Kvartira/uy pasporti
         if (area <= 100) {
           _calculatedSum = bhm * 1.25;
         } else if (area <= 300) {
@@ -2287,13 +1394,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           _calculatedSum = bhm * 3.0;
         }
       } else if (_selectedService == 'reyestr') {
-        // Davlat ro'yxatidan o'tkazish
         _calculatedSum = bhm * 1.0;
       } else if (_selectedService == 'spravka') {
-        // Ko'chirma
         _calculatedSum = bhm * 0.05;
       } else {
-        // Noturar
         _calculatedSum = bhm * 3.5;
       }
     });
@@ -2301,42 +1405,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final lang = widget.lang;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B3C7B),
+        backgroundColor: const Color(0xFF08336E),
         iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          lang == AppLanguage.russian ? 'Калькулятор госпошлины' : (lang == AppLanguage.uzbekCyrillic ? 'Давлат божи калькулятори' : 'Davlat boji kalkulyatori'),
-          style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Davlat boji kalkulyatori', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Container(
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(color: const Color(0xFFE8F5E9), borderRadius: BorderRadius.circular(12)),
-            child: Row(
-              children: [
-                const Icon(Icons.verified, color: Colors.green, size: 28),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    lang == AppLanguage.russian
-                        ? 'Расчет по официальным ставкам БРВ. Не переплачивайте посредникам!'
-                        : (lang == AppLanguage.uzbekCyrillic
-                            ? 'БҲМ асосида расмий ҳисоб. Маклерларга ортиқча пул берманг!'
-                            : 'BHM asosidagi qonuniy rasmiy hisob. Maklerlarga ortiqcha pul to‘lamang!'),
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20)),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
           Card(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
             child: Padding(
@@ -2344,34 +1422,18 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    lang == AppLanguage.russian ? 'Выберите тип услуги:' : (lang == AppLanguage.uzbekCyrillic ? 'Хизмат турини танланг:' : 'Xizmat turini tanlang:'),
-                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                  ),
+                  const Text('Xizmat turini tanlang:', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                   const SizedBox(height: 8),
                   DropdownButtonFormField<String>(
                     value: _selectedService,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                     ),
-                    items: [
-                      DropdownMenuItem(
-                        value: 'turar',
-                        child: Text(lang == AppLanguage.russian ? 'Кадастровый паспорт (Жилье)' : 'Uy-joy kadastr pasporti'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'reyestr',
-                        child: Text(lang == AppLanguage.russian ? 'Госрегистрация (Реестр)' : 'Mulk huquqini ro‘yxatdan o‘tkazish'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'spravka',
-                        child: Text(lang == AppLanguage.russian ? 'Выписка с QR-кодом' : 'Davlat reyestridan ko‘chirma'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'noturar',
-                        child: Text(lang == AppLanguage.russian ? 'Коммерческий объект (Нежилое)' : 'Tadbirkorlik (Noturar bino)'),
-                      ),
+                    items: const [
+                      DropdownMenuItem(value: 'turar', child: Text('Turar joy kadastr pasporti')),
+                      DropdownMenuItem(value: 'reyestr', child: Text('Mulk huquqini davlat ro‘yxatidan o‘tkazish')),
+                      DropdownMenuItem(value: 'spravka', child: Text('Elektron ko‘chirma (QR-kodli)')),
+                      DropdownMenuItem(value: 'noturar', child: Text('Tadbirkorlik (Noturar bino)')),
                     ],
                     onChanged: (val) {
                       _selectedService = val!;
@@ -2380,10 +1442,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   ),
                   if (_selectedService == 'turar' || _selectedService == 'noturar') ...[
                     const SizedBox(height: 16),
-                    Text(
-                      lang == AppLanguage.russian ? 'Общая площадь (кв. метр):' : (lang == AppLanguage.uzbekCyrillic ? 'Умумий майдони (кв. метр):' : 'Umumiy maydoni (kv. metr):'),
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
-                    ),
+                    const Text('Umumiy maydoni (kv. metr):', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
                     const SizedBox(height: 8),
                     TextField(
                       controller: _areaController,
@@ -2403,29 +1462,19 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: const Color(0xFF0B3C7B),
+              color: const Color(0xFF08336E),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
               children: [
-                Text(
-                  lang == AppLanguage.russian ? 'ОФИЦИАЛЬНАЯ ГОСПОШЛИНА' : (lang == AppLanguage.uzbekCyrillic ? 'РАСМИЙ ДАВЛАТ ТЎЛОВИ' : 'RASMIY QONUNIY TO‘LOV'),
-                  style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold, letterSpacing: 1),
-                ),
+                const Text('QONUNIY RASMIY TO‘LOV', style: TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Text(
                   '${_calculatedSum.toInt().toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]} ')} so‘m',
-                  style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  lang == AppLanguage.russian
-                      ? 'my.gov.uz дает скидку 10% от этой суммы!'
-                      : (lang == AppLanguage.uzbekCyrillic
-                          ? 'my.gov.uz орқали тўланса 10% чегирма берилади!'
-                          : 'my.gov.uz orqali to‘lansa 10% chegirma beriladi!'),
-                  style: const TextStyle(color: Color(0xFF81C784), fontSize: 12, fontWeight: FontWeight.bold),
-                ),
+                const Text('my.gov.uz orqali to‘lansa 10% chegirma beriladi!', style: TextStyle(color: Color(0xFF81C784), fontSize: 13, fontWeight: FontWeight.bold)),
               ],
             ),
           )
@@ -2435,317 +1484,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
   }
 }
 
-// ---------------- AMNISTIYA TESTI (O‘RQ-937 QONUNI) ----------------
-class AmnestyTestScreen extends StatefulWidget {
-  final AppLanguage lang;
-  const AmnestyTestScreen({super.key, required this.lang});
-
-  @override
-  State<AmnestyTestScreen> createState() => _AmnestyTestScreenState();
-}
-
-class _AmnestyTestScreenState extends State<AmnestyTestScreen> {
-  int _q1 = -1; // 2018 yilgacha qurilganmi?
-  int _q2 = -1; // Xavfli zonadami?
-  int _q3 = -1; // Nizo bormi?
-
-  @override
-  Widget build(BuildContext context) {
-    final lang = widget.lang;
-    bool allAnswered = _q1 != -1 && _q2 != -1 && _q3 != -1;
-    bool isEligible = _q1 == 1 && _q2 == 0 && _q3 == 0;
-
-    return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0B3C7B),
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          lang == AppLanguage.russian ? 'Тест ЗРУ-937 (Амнистия)' : (lang == AppLanguage.uzbekCyrillic ? 'Амнистия тести (ЎРҚ-937)' : 'Amnistiya testi (O‘RQ-937)'),
-          style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(color: Colors.amber.shade50, borderRadius: BorderRadius.circular(10), border: Border.all(color: Colors.amber)),
-            child: Text(
-              lang == AppLanguage.russian
-                  ? 'Узнайте за 1 минуту, подпадает ли ваш дом под признание прав по Закону ЗРУ-937 от 05.08.2024.'
-                  : (lang == AppLanguage.uzbekCyrillic
-                      ? 'Уйингиз ЎРҚ-937-сон Қонун бўйича қонуний тан олинишга тўғри келадими? 1 дақиқада текширинг.'
-                      : 'Uyingiz O‘RQ-937-son Qonun bo‘yicha eʼtirof etilishga to‘g‘ri keladimi? 1 daqiqada tekshiring.'),
-              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.brown),
-            ),
-          ),
-          const SizedBox(height: 16),
-          _buildQuestion(
-            title: lang == AppLanguage.russian ? '1. Дом построен до 1 мая 2018 года?' : '1. Uyingiz 2018-yil 1-maygacha qurilganmi?',
-            val: _q1,
-            onYes: () => setState(() => _q1 = 1),
-            onNo: () => setState(() => _q1 = 0),
-          ),
-          _buildQuestion(
-            title: lang == AppLanguage.russian ? '2. Находится ли дом в охранной зоне (ЛЭП, газ, водоохранная)?' : '2. Uy daryo bo‘yi, gaz quvuri yoki simlar ostidami?',
-            val: _q2,
-            onYes: () => setState(() => _q2 = 1),
-            onNo: () => setState(() => _q2 = 0),
-          ),
-          _buildQuestion(
-            title: lang == AppLanguage.russian ? '3. Имеется ли спор по границе с соседями?' : '3. Qo‘shnilar bilan yer talashi (sud/nizo) bormi?',
-            val: _q3,
-            onYes: () => setState(() => _q3 = 1),
-            onNo: () => setState(() => _q3 = 0),
-          ),
-          if (allAnswered) ...[
-            const SizedBox(height: 20),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: isEligible ? const Color(0xFFE8F5E9) : const Color(0xFFFFEBEE),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: isEligible ? Colors.green : Colors.red, width: 1.5),
-              ),
-              child: Column(
-                children: [
-                  Icon(isEligible ? Icons.check_circle : Icons.cancel, color: isEligible ? Colors.green : Colors.red, size: 40),
-                  const SizedBox(height: 10),
-                  Text(
-                    isEligible
-                        ? (lang == AppLanguage.russian ? 'ВЫ ПОДПАДАЕТЕ ПОД ЗАКОН ЗРУ-937!' : 'UYINGIZ QONUNIY TAN OLINISHGA TUSHADI!')
-                        : (lang == AppLanguage.russian ? 'ТРЕБУЕТСЯ ИНДИВИДУАЛЬНОЕ РАССМОТРЕНИЕ' : 'ALOHIDA HUQUQIY O‘RGANISH TALAB ETILADI'),
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: isEligible ? Colors.green.shade900 : Colors.red.shade900),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    isEligible
-                        ? (lang == AppLanguage.russian
-                            ? 'Сотрудники кадастра включат ваш дом в реестр в ходе сплошной инвентаризации по махалле. Никому не платите!'
-                            : 'Uyingiz bepul xatlov dasturiga tushadi. Hech qanday vositachilarga pul bermang, ishchi guruh kelishini kuting!')
-                        : (lang == AppLanguage.russian
-                            ? 'Нахождение в охранных зонах или земельные споры исключают автоматическое признание прав.'
-                            : 'Muhofaza zonasida joylashgan yoki qo‘shnilar bilan nizosi bor yerlar avtomat qonuniylashtirilmaydi.'),
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 13, height: 1.4),
-                  ),
-                ],
-              ),
-            )
-          ]
-        ],
-      ),
-    );
-  }
-
-  Widget _buildQuestion({required String title, required int val, required VoidCallback onYes, required VoidCallback onNo}) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: val == 1 ? const Color(0xFF0B3C7B) : null,
-                      foregroundColor: val == 1 ? Colors.white : null,
-                    ),
-                    onPressed: onYes,
-                    child: Text(widget.lang == AppLanguage.russian ? 'Да' : 'Ha'),
-                  ),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: OutlinedButton(
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: val == 0 ? const Color(0xFF0B3C7B) : null,
-                      foregroundColor: val == 0 ? Colors.white : null,
-                    ),
-                    onPressed: onNo,
-                    child: Text(widget.lang == AppLanguage.russian ? 'Нет' : 'Yo‘q'),
-                  ),
-                ),
-              ],
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------- KORRUPSIYAGA DUCH KELSANGIZ (QADAMLAR) ----------------
-class CorruptionHelpScreen extends StatelessWidget {
-  final AppLanguage lang;
-  const CorruptionHelpScreen({super.key, required this.lang});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
-      appBar: AppBar(
-        backgroundColor: Colors.red.shade900,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          lang == AppLanguage.russian ? 'Действия при коррупции' : (lang == AppLanguage.uzbekCyrillic ? 'Коррупцияга дуч келсангиз' : 'Korrupsiyaga duch kelsangiz'),
-          style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(14), border: Border.all(color: Colors.red.shade200)),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(Icons.gavel, color: Colors.red.shade900, size: 28),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        lang == AppLanguage.russian ? 'ВАШИ ЗАКОННЫЕ ПРАВА:' : 'SIZNING QONUNIY HUQUQLARINGIZ:',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.red.shade900),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Text(
-                  lang == AppLanguage.russian
-                      ? '1. Ни один сотрудник кадастра не имеет права брать наличные деньги в руки.\n'
-                        '2. Любая плата производится строго через электронный инвойс.\n'
-                        '3. Требование справок, не входящих в утвержденный перечень — грубое правонарушение.'
-                      : '1. Birorta ham kadastr xodimi sizdan qo‘lda naqd pul olishga haqi yo‘q.\n'
-                        '2. Barcha to‘lovlar faqat telefoningizga kelgan rasmiy SMS-invoys orqali to‘lanadi.\n'
-                        '3. Tasdiqlangan ro‘yxatdan tashqari qo‘shimcha hujjat talab qilish qonunbuzarlikdir.',
-                  style: const TextStyle(fontSize: 14, height: 1.45),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            lang == AppLanguage.russian ? 'Официальные горячие линии:' : 'Rasmiy tezkor aloqa liniyalari:',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 10),
-          _buildContactCard(
-            title: lang == AppLanguage.russian ? 'Агентство по кадастру (Колл-центр)' : 'Kadastr agentligi Call-markazi',
-            phone: '1097',
-            desc: lang == AppLanguage.russian ? 'Жалобы на действия сотрудников' : 'Xodimlar ustidan tezkor shikoyatlar',
-          ),
-          _buildContactCard(
-            title: lang == AppLanguage.russian ? 'Генеральная прокуратура РУз' : 'Bosh prokuratura ishonch telefoni',
-            phone: '1007',
-            desc: lang == AppLanguage.russian ? 'Борьба с коррупцией и вымогательством' : 'Korrupsiya va tamagirlik holatlari',
-          ),
-          _buildContactCard(
-            title: lang == AppLanguage.russian ? 'Департамент при Генпрокуратуре' : 'Iqtisodiy jinoyatlarga qarshi kurashish departamenti',
-            phone: '+998 (71) 233-10-07',
-            desc: lang == AppLanguage.russian ? 'Финансовые преступления и взятки' : 'Noqonuniy vositachilik va poraxo‘rlik',
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildContactCard({required String title, required String phone, required String desc}) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: ListTile(
-        leading: const CircleAvatar(
-          backgroundColor: Color(0xFFE8F5E9),
-          child: Icon(Icons.phone, color: Colors.green),
-        ),
-        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-        subtitle: Text('$desc\nTelefon: $phone', style: const TextStyle(fontSize: 12)),
-        isThreeLine: true,
-      ),
-    );
-  }
-}
-
-// ---------------- ALOHIDA LUG‘AT (QOMUS) EKRANI ----------------
-class VocabularyScreen extends StatelessWidget {
-  final AppLanguage lang;
-  const VocabularyScreen({super.key, required this.lang});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF1F5F9),
-      appBar: AppBar(
-        backgroundColor: const Color(0xFF0B3C7B),
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          lang == AppLanguage.russian ? 'Словарь документов' : (lang == AppLanguage.uzbekCyrillic ? 'Ҳужжатлар қомуси' : 'Hujjatlar nima? (Sodda qomus)'),
-          style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
-        ),
-      ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(16),
-        itemCount: allVocabularies.length,
-        itemBuilder: (context, i) {
-          final item = allVocabularies[i];
-          return Card(
-            elevation: 2,
-            margin: const EdgeInsets.only(bottom: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            child: ExpansionTile(
-              initiallyExpanded: i == 0,
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFFE8EEF7),
-                child: Icon(Icons.menu_book, color: Color(0xFF0B3C7B)),
-              ),
-              title: Text(item.term.get(lang), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Divider(),
-                      Text(item.simpleExplanation.get(lang), style: const TextStyle(fontSize: 14, height: 1.4)),
-                      const SizedBox(height: 10),
-                      Text(
-                        lang == AppLanguage.russian ? 'Что внутри:' : 'Ichida nimalar yozilgan bo‘ladi:',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0B3C7B)),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(item.whatIsInside.get(lang), style: const TextStyle(fontSize: 13, height: 1.4)),
-                      const SizedBox(height: 10),
-                      Text(
-                        lang == AppLanguage.russian ? 'Где найти:' : 'Qayerdan topiladi:',
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Colors.green),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(item.whereToFind.get(lang), style: const TextStyle(fontSize: 13, height: 1.4)),
-                    ],
-                  ),
-                )
-              ],
-            ),
-          );
-        },
-      ),
-    );
-  }
-}
-
-// ---------------- LOYIHA HAQIDA VA ALOQA EKRANI ----------------
+// ---------------- HAQIDA VA ALOQA EKRANI ----------------
 class AboutScreen extends StatelessWidget {
   final AppLanguage lang;
   const AboutScreen({super.key, required this.lang});
@@ -2755,63 +1494,13 @@ class AboutScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0B3C7B),
+        backgroundColor: const Color(0xFF08336E),
         iconTheme: const IconThemeData(color: Colors.white),
-        title: Text(
-          lang == AppLanguage.russian ? 'О проекте и контакты' : (lang == AppLanguage.uzbekCyrillic ? 'Лойиҳа мақсади ва Алоқа' : 'Loyiha maqsadi va Aloqa'),
-          style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.bold),
-        ),
+        title: const Text('Loyiha maqsadi va Aloqa', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
-            elevation: 2,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            child: Padding(
-              padding: const EdgeInsets.all(18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(10)),
-                        child: const Icon(Icons.shield, color: Colors.red, size: 30),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          lang == AppLanguage.russian ? 'Официальная цель проекта' : 'Loyihaning rasmiy maqsadi',
-                          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0B3C7B)),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 24),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(color: const Color(0xFFE8F5E9), borderRadius: BorderRadius.circular(10)),
-                    child: Text(
-                      lang == AppLanguage.russian
-                          ? 'Проект разработан по инициативе отдела по борьбе с коррупцией Агентства по кадастру Республики Узбекистан.'
-                          : 'Ushbu loyiha O‘zbekiston Respublikasi Kadastr agentligining Korrupsiyaga qarshi kurashish bo‘limi tashabbusi asosida ishlab chiqildi.',
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF1B5E20), height: 1.35),
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  Text(
-                    lang == AppLanguage.russian
-                        ? 'Главная цель: Предотвращение коррупционных рисков и вымогательства в сфере кадастра путем предоставления гражданам исчерпывающей и понятной юридической информации по всем 22 государственным услугам.'
-                        : 'Asosiy maqsad: Fuqarolar o‘zida bor yoki yo‘q hujjatlarni bilmasdan turli vositachilar (maklerlar) tuzog‘iga tushib qolishini oldini olish, asossiz talablarga chek qo‘yish va barcha 22 ta rasmiy davlat xizmati bo‘yicha shaffof qo‘llanma taqdim etish.',
-                    style: const TextStyle(fontSize: 14, height: 1.45),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
           Card(
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
             child: const Padding(
@@ -2819,12 +1508,12 @@ class AboutScreen extends StatelessWidget {
               child: Column(
                 children: [
                   CircleAvatar(
-                    radius: 36,
-                    backgroundColor: Color(0xFF0B3C7B),
-                    child: Icon(Icons.person, size: 40, color: Colors.white),
+                    radius: 38,
+                    backgroundColor: Color(0xFF08336E),
+                    child: Icon(Icons.person, size: 44, color: Colors.white),
                   ),
                   SizedBox(height: 10),
-                  Text('Muxriddin Elbegiyev', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text('Muxriddin Elbegiyev', style: TextStyle(fontSize: 19, fontWeight: FontWeight.bold)),
                   Text('Dastur yaratuvchisi va loyiha muallifi', style: TextStyle(fontSize: 13, color: Colors.grey)),
                   Divider(height: 24),
                   ListTile(
@@ -2837,7 +1526,7 @@ class AboutScreen extends StatelessWidget {
                     contentPadding: EdgeInsets.zero,
                     leading: CircleAvatar(backgroundColor: Color(0xFFE1F5FE), child: Icon(Icons.send, color: Colors.lightBlue)),
                     title: Text('Telegram aloqa', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                    subtitle: Text('+998 33 911 22 22', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF0B3C7B))),
+                    subtitle: Text('+998 33 911 22 22', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Color(0xFF08336E))),
                   ),
                 ],
               ),
