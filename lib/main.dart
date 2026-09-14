@@ -25,9 +25,9 @@ class OsonKadastrApp extends StatelessWidget {
 class RequiredDocument {
   final String simpleName;
   final String officialName;
-  final String whatIsIt; // Bu qanday hujjat? (Oddiy tilda)
-  final String insideContent; // Ichida nimalar yozilgan bo‘lishi shart?
-  final String whereToGet; // Qayerdan olinadi yoki yo‘qolgan bo‘lsa nima qilinadi?
+  final String whatIsIt;
+  final String insideContent;
+  final String whereToGet;
 
   RequiredDocument({
     required this.simpleName,
@@ -69,20 +69,20 @@ final List<KadastrService> kadastrServices = [
   // 1
   KadastrService(
     id: '1',
-    titleSimple: 'Turar joyga (kvartira, hovli) kadastr pasportini shakllantirish',
+    titleSimple: 'Turar joyga kadastr pasportini shakllantirish',
     titleOfficial: 'Ko‘chmas mulk obyektiga (turar joy) kadastr pasportini berish (VM 535-son qaror)',
     category: 'Kadastr pasporti',
     purpose: 'Kvartira yoki yakka tartibdagi hovli uyning texnik parametrlarini o‘lchab, rasmiy elektron pasport va raqamli chizmasini tayyorlash.',
-    duration: 'Ko‘p qavatli uydagi kvartira uchun — 3 ish kuni; Yakka tartibdagi hovli uy uchun — 5 ish kuni',
+    duration: 'Kvartira uchun — 3 ish kuni; Yakka tartibdagi hovli uy uchun — 5 ish kuni',
     cost: 'Maydoniga qarab hisoblangan invoys bo‘yicha (my.gov.uz orqali 10% chegirma)',
     warningTip: 'Agar uyingizda rekonstruksiya yoki yangi xona qurilgan bo‘lsa, arxitektura ruxsatnomasisiz o‘zboshimchalik deb topiladi. Qo‘ldan pul bermang, to‘lov faqat SMS-invoys orqali!',
     docs: [
       RequiredDocument(
         simpleName: 'Mulk huquqini tasdiqlovchi hujjat',
-        officialName: 'Huquq belgilovchi hujjat (Oldi-sotdi bitimi, tuman hokimi qarori, order yoki meros guvohnomasi)',
+        officialName: 'Huquq belgilovchi hujjat (Bitim, qaror, order)',
         whatIsIt: 'Siz bu uyga qanday qilib qonuniy ega bo‘lganingizni isbotlovchi gerbli asosiy hujjat.',
-        insideContent: '• Notarius muhri, bitim sanasi va reyestr raqami (yoki hokimlik gerbli muhri);\n• Mulkdorning to‘liq F.I.Sh. va pasport maʼlumotlari;\n• Mulkning aniq manzili (tuman, mahalla, ko‘cha, uy raqami).',
-        whereToGet: 'Bitim tuzilgan notarial idoradan, tuman hokimligi devonxonasidan yoki viloyat davlat arxividan.',
+        insideContent: '• Notarius muhri, bitim sanasi va reyestr raqami (yoki hokimlik gerbli muhri);\n• Mulkdorning to‘liq F.I.Sh. va pasport maʼlumotlari;\n• Mulkning aniq manzili.',
+        whereToGet: 'Bitim tuzilgan notarial idoradan, tuman hokimligi devonxonasidan yoki davlat arxividan.',
       ),
       RequiredDocument(
         simpleName: 'Shaxsni tasdiqlovchi hujjat (JShSHIR)',
@@ -92,9 +92,9 @@ final List<KadastrService> kadastrServices = [
         whereToGet: 'Yoningizda bo‘lishi kifoya. Nusxa qoldirish talab etilmaydi.',
       ),
       RequiredDocument(
-        simpleName: 'Qayta qurish (rekonstruksiya) qilingan bo‘lsa — Loyiha va Ruxsatnoma',
-        officialName: 'Arxitektura-rejalashtirish topshirig‘i (APZ) va Qurilish bo‘limi ruxsatnomasi',
-        whatIsIt: 'Agar hovlida yangi xona qurilgan yoki devorlar surilgan bo‘lsa, tuman Qurilish va arxitektura bo‘limi ruxsati.',
+        simpleName: 'Qayta qurish bo‘lsa — Loyiha va Ruxsatnoma',
+        officialName: 'APZ va Qurilish bo‘limi ruxsatnomasi',
+        whatIsIt: 'Agar hovlida yangi xona qurilgan yoki devorlar surilgan bo‘lsa, Qurilish va arxitektura bo‘limi ruxsati.',
         insideContent: '• Shaharsozlik kengashi tasdig‘i;\n• Kelishilgan chizma loyiha va xavfsizlik xulosasi.',
         whereToGet: 'Yagona darcha (DXM) yoki my.gov.uz orqali Qurilish bo‘limidan olinadi.',
       ),
@@ -108,14 +108,14 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Tadbirkorlik va noturar binolarga kadastr pasporti olish',
     titleOfficial: 'Ko‘chmas mulk obyektiga (noturar bino) kadastr pasportini berish',
     category: 'Kadastr pasporti',
-    purpose: 'Do‘kon, ofis, savdo markazi, ishlab chiqarish sexi yoki omborxona kabi tijorat obyektlarining elektron kadastr pasportini rasmiylashtirish.',
+    purpose: 'Do‘kon, ofis, savdo markazi, sex yoki omborxona kabi tijorat obyektlarining elektron kadastr pasportini rasmiylashtirish.',
     duration: '100 kv.mgacha — 5 ish kuni; 1000 kv.mgacha — 7 ish kuni; 5000 kv.mgacha — 10 ish kuni',
     cost: 'Belgilangan davlat tarif stavkasi bo‘yicha (invoys asosida)',
     warningTip: 'Tadbirkorlik binolarida qurilish nazorati inspeksiyasi (GASN) xulosasi bo‘lishi shart. Vositachilarga aldanmang!',
     docs: [
       RequiredDocument(
         simpleName: 'Mulk huquqi yoki yer ajratish hujjati',
-        officialName: 'Oldi-sotdi shartnomasi / E-auksion yutuq bayonnomasi / Hokim qarori',
+        officialName: 'Oldi-sotdi shartnomasi / E-auksion bayonnomasi / Qaror',
         whatIsIt: 'Bino yoki bino joylashgan yer sizniki ekanini bildiruvchi qonuniy hujjat.',
         insideContent: '• Mulkdor rekvizitlari, faoliyat turi va binoning ruxsat etilgan maqsadi.',
         whereToGet: 'E-auksion tizimidan, notariusdan yoki davlat arxividan.',
@@ -123,9 +123,9 @@ final List<KadastrService> kadastrServices = [
       RequiredDocument(
         simpleName: 'Foydalanishga qabul qilish dalolatnomasi (GASN)',
         officialName: 'Tugallangan qurilish obyektini foydalanishga qabul qilish to‘g‘risidagi ruxsatnoma',
-        whatIsIt: 'Qurilish va arxitektura nazorati inspeksiyasi tomonidan bino xavfsiz va loyiha asosida qurilganini tasdiqlovchi rasmiy dalolatnoma.',
+        whatIsIt: 'Qurilish nazorati inspeksiyasi tomonidan bino xavfsiz qurilganini tasdiqlovchi rasmiy dalolatnoma.',
         insideContent: '• Qabul qilish komissiyasining elektron QR-kodli xulosasi va ro‘yxat raqami.',
-        whereToGet: 'Qurilish vazirligi hududiy inspeksiyasi (Shaharsozlik nazorati) orqali DXMda olinadi.',
+        whereToGet: 'Qurilish vazirligi hududiy inspeksiyasi orqali DXMda olinadi.',
       ),
     ],
     illegalDemands: ['Soliqdan qarz yo‘qligi maʼlumotnomasi', 'Hokimiyatning alohida yozma xati'],
@@ -135,17 +135,17 @@ final List<KadastrService> kadastrServices = [
   KadastrService(
     id: '3',
     titleSimple: 'Mulk huquqini davlat ro‘yxatidan o‘tkazish (Reyestr)',
-    titleOfficial: 'Ko‘chmas mulkka bo‘lgan huquqlarni davlat ro‘yxatidan o‘tkazish (VM 535-son qaror 2-ilova)',
+    titleOfficial: 'Ko‘chmas mulkka bo‘lgan huquqlarni davlat ro‘yxatidan o‘tkazish (VM 535-son qaror)',
     category: 'Davlat ro‘yxati',
-    purpose: 'Notariusda tuzilgan oldi-sotdi, hadya, meros shartnomasi yoki auksion bayonnomasidan so‘ng yangi mulkdorni Yagona davlat reyestriga rasman kiritish.',
+    purpose: 'Notariusda tuzilgan oldi-sotdi, hadya, meros shartnomasidan so‘ng yangi mulkdorni Yagona davlat reyestriga rasman kiritish.',
     duration: '2 ish kuni',
     cost: 'BHMning 1 dan 1.25 baravarigacha',
-    warningTip: 'QONUNIY TALAB: Notarial bitim tuzilgandan so‘ng 1 oy ichida davlat ro‘yxatidan o‘tkazilmasa, maʼmuriy jarima qo‘llaniladi va mulk huquqi rasman kuchga kirmaydi.',
+    warningTip: 'Notarial bitim tuzilgandan so‘ng 1 oy ichida davlat ro‘yxatidan o‘tkazilmasa, maʼmuriy jarima qo‘llaniladi.',
     docs: [
       RequiredDocument(
         simpleName: 'Huquq vujudga kelganini tasdiqlovchi hujjat',
         officialName: 'Notarial tasdiqlangan shartnoma, meros guvohnomasi yoki sud qarori',
-        whatIsIt: 'Uy sizga rasman o‘tganini tasdiqlovchi gerbli, qatʼiy hisobdagi notarial blanka.',
+        whatIsIt: 'Uy sizga rasman o‘tganini tasdiqlovchi gerbli notarial blanka.',
         insideContent: '• Notarius muhri, bitim sanasi va elektron reyestr raqami.',
         whereToGet: 'Notarial idoradan shartnoma imzolangan zahoti beriladi.',
       ),
@@ -157,7 +157,7 @@ final List<KadastrService> kadastrServices = [
         whereToGet: 'Kadastr bazasidan avtomatik olinadi.',
       ),
     ],
-    illegalDemands: ['Notarius tasdiqlagan qog‘ozni hokimiyatda qayta muhrlatish', 'Arxivdan qo‘shimcha spravka'],
+    illegalDemands: ['Notarius tasdiqlagan qog‘ozni hokimiyatda qayta muhrlatish'],
   ),
 
   // 4
@@ -166,8 +166,8 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Davlat reyestridan ko‘chirma olish (Mulkdorlik hujjati)',
     titleOfficial: 'Ko‘chmas mulk bo‘yicha davlat reyestridan ko‘chirma berish',
     category: 'Maʼlumotnoma',
-    purpose: 'Ayni daqiqada mulk kimning nomida turganini isbotlab beruvchi QR-kodli rasmiy davlat hujjati (Guvohnoma o‘rniga o‘tadi).',
-    duration: '1 ish kuni (real vaqt rejimida avtomatik)',
+    purpose: 'Ayni daqiqada mulk kimning nomida turganini isbotlab beruvchi QR-kodli rasmiy davlat hujjati.',
+    duration: '1 ish kuni (real vaqtda avtomatik)',
     cost: 'BHMning 0.05 baravari',
     warningTip: 'Eski ko‘k muhrli qog‘oz guvohnomalar bekor bo‘lgan, hozirgi kunda mana shu QR-kodli ko‘chirma yagona yuridik kuchga ega.',
     docs: [
@@ -186,9 +186,9 @@ final List<KadastrService> kadastrServices = [
   KadastrService(
     id: '5',
     titleSimple: 'Nomida shaxsiy turar joy yo‘qligi haqida maʼlumotnoma',
-    titleOfficial: 'Fuqaroning nomida shaxsiy turar joy mavjud yoki mavjud emasligi to‘g‘risida maʼlumotnoma',
+    titleOfficial: 'Fuqaroning nomida shaxsiy turar joy mavjud emasligi to‘g‘risida maʼlumotnoma',
     category: 'Maʼlumotnoma',
-    purpose: 'Davlat subsidiyasi, arzon imtiyozli ipoteka krediti yoki uy-joy navbatiga turish uchun nomingizda mulk yo‘qligini tasdiqlash.',
+    purpose: 'Davlat subsidiyasi, arzon ipoteka krediti yoki uy-joy navbatiga turish uchun nomingizda uy yo‘qligini tasdiqlash.',
     duration: 'Avtomatik (1 kun ichida)',
     cost: 'BHMning 0.05 baravari',
     warningTip: 'Respublika bo‘yicha barcha viloyat bazalari JShSHIR bo‘yicha avtomatik tekshiriladi.',
@@ -201,7 +201,7 @@ final List<KadastrService> kadastrServices = [
         whereToGet: 'ID-kartangizning orqa tomonida bo‘ladi.',
       ),
     ],
-    illegalDemands: ['Mahalla raisidan "uysiz" degan maʼlumotnoma so‘rash'],
+    illegalDemands: ['Mahalladan maʼlumotnoma so‘rash'],
   ),
 
   // 6
@@ -213,7 +213,7 @@ final List<KadastrService> kadastrServices = [
     purpose: 'Mulkka sud, MIB ijrosi, notarius yoki bank tomonidan taqiq qo‘yilgan-qo‘yilmaganligini oldindan aniqlash.',
     duration: 'Real vaqtda (1 kun)',
     cost: 'BHMning 0.05 baravari',
-    warningTip: 'Taqiqi bor uyni sotib olmang! Taqiq to‘liq yechilmagunicha sotuvchiga zaklad (garov puli) bermang.',
+    warningTip: 'Taqiqi bor uyni sotib olmang va taqiq yechilmaguncha zaklad bermang!',
     docs: [
       RequiredDocument(
         simpleName: 'Uyning kadastr raqami',
@@ -223,7 +223,7 @@ final List<KadastrService> kadastrServices = [
         whereToGet: 'Sotuvchining kadastr pasportidan olinadi.',
       ),
     ],
-    illegalDemands: ['MIB bo‘limiga borib qo‘lda imzo va muhr qo‘ydirib kelish'],
+    illegalDemands: ['MIB bo‘limiga borib imzo qo‘ydirib kelish'],
   ),
 
   // 7
@@ -235,19 +235,19 @@ final List<KadastrService> kadastrServices = [
     purpose: 'Bitta umumiy hovlini mulkdorlar o‘rtasida alohida mustaqil ikki yoki undan ortiq xonadonlarga ajratish.',
     duration: '10 dan 15 ish kunigacha',
     cost: 'Maydoni va meʼmoriy chizmasiga asosan',
-    warningTip: 'SHAHARSOZLIK MEʼYORI: Har bir yangi hosil bo‘ladigan hovlida umumiy ko‘chaga mustaqil chiqish darvozasi (yo‘li) bo‘lishi shart. Agar yo‘l bo‘lmasa, bo‘lish rad etiladi.',
+    warningTip: 'Har bir yangi hosil bo‘ladigan hovlida umumiy ko‘chaga mustaqil chiqish darvozasi bo‘lishi shart.',
     docs: [
       RequiredDocument(
         simpleName: 'Taqsimlash kelishuvi yoki sud ajrimi',
-        officialName: 'Notarial tasdiqlangan bo‘lish bitimi yoki qonuniy kuchga kirgan sud qarori',
+        officialName: 'Notarial tasdiqlangan bo‘lish bitimi yoki sud qarori',
         whatIsIt: 'Mulkdorlar uyni qaysi devordan ajratishga kelishgani hujjati.',
-        insideContent: '• Kimga qaysi xonalar va necha sotix yer tegishi haqidagi chizma reja.',
-        whereToGet: 'Notarial idorada rasmiylashtiriladi (kelishmovchilik bo‘lsa suddan olinadi).',
+        insideContent: '• Reja va har bir tomonning ulushlari.',
+        whereToGet: 'Notarial idorada rasmiylashtiriladi yoki suddan olinadi.',
       ),
       RequiredDocument(
-        simpleName: 'Tuman Qurilish bo‘limi xulosasi',
-        officialName: 'Binoni bo‘lishning shaharsozlik va seysmik jihatdan mumkinligi haqida xulosa',
-        whatIsIt: 'Imoratni ikkiga bo‘lganda yuk ko‘taruvchi devorlar va xavfsizlikka ziyon yetmasligini tasdiqlovchi hujjat.',
+        simpleName: 'Qurilish bo‘limi xulosasi',
+        officialName: 'Binoni bo‘lishning shaharsozlik jihatdan mumkinligi haqida xulosa',
+        whatIsIt: 'Imoratni bo‘lganda yuk ko‘taruvchi devorlarga ziyon yetmasligini tasdiqlovchi hujjat.',
         insideContent: '• Arxitektor ko‘rigi bayonnomasi.',
         whereToGet: 'Tuman qurilish va arxitektura bo‘limidan olinadi.',
       ),
@@ -268,39 +268,39 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Ko‘p kvartirali uy oldidagi tutash yerlarni rasmiylashtirish',
     titleOfficial: 'Ko‘p kvartirali uyga tutash yer uchastkasini ro‘yxatdan o‘tkazish',
     category: 'Yer uchastkasi',
-    purpose: 'Dom oldidagi o‘yin maydonchasi va yashil hududni begona shaxslar egallab olmasligi uchun dom egalarining umumiy mulki qilib qo‘yish.',
+    purpose: 'Dom oldidagi maydonni aholining umumiy foydalanishdagi mulki sifatida rasmiylashtirish.',
     duration: '10 ish kuni',
     cost: 'Bepul / Minimal stavka',
-    warningTip: 'Ushbu yer sotilmaydi yoki bitta shaxsga xususiylashtirilmaydi, u butun dom xonadon egalariga daxlsiz umumiy mulk bo‘ladi.',
+    warningTip: 'Bu yer bitta shaxsga sotilmaydi, faqat butun dom egalariga tegishli umumiy daxlsiz yer bo‘ladi.',
     docs: [
       RequiredDocument(
         simpleName: 'Mulkdorlar umumiy yig‘ilishi bayonnomasi',
         officialName: 'Ko‘p kvartirali uy mulkdorlarining umumiy yig‘ilishi qarori',
-        whatIsIt: 'Domda yashovchilarning 50% dan ortig‘i yerni rasmiylashtirishga ovoz bergan rasmiy bayonnoma.',
+        whatIsIt: 'Domda yashovchilarning 50% dan ortig‘i yerni rasmiylashtirishga rozi bo‘lgan bayonnoma.',
         insideContent: '• Mulkdorlar ro‘yxati, xonadon raqamlari va shaxsiy imzolari.',
-        whereToGet: 'Boshqaruv servis kompaniyasi (BSHM) yoki mahalla bilan birga tuziladi.',
+        whereToGet: 'BSHM yoki mahalla bilan birga tuziladi.',
       ),
     ],
-    illegalDemands: ['Har bir xonadondan alohida pulli ariza talab qilish'],
+    illegalDemands: ['Har bir xonadondan alohida pulli ariza so‘rash'],
   ),
 
   // 9
   KadastrService(
     id: '9',
-    titleSimple: 'Bino va inshootlar ijara shartnomasini davlat ro‘yxatidan o‘tkazish',
+    titleSimple: 'Bino va inshootlar ijara shartnomasini ro‘yxatdan o‘tkazish',
     titleOfficial: 'Ko‘chmas mulk ijara shartnomasini davlat ro‘yxatidan o‘tkazish',
     category: 'Davlat ro‘yxati',
-    purpose: 'Noturar bino, savdo do‘koni yoki sexni 1 yildan ortiq muddatga ijaraga berganda huquqni mustahkamlash.',
+    purpose: 'Noturar bino yoki sexni 1 yildan ortiq muddatga ijaraga berganda huquqni mustahkamlash.',
     duration: '2 ish kuni',
     cost: 'BHMning 0.5 baravari',
-    warningTip: '1 yildan oshiq muddatli bino ijaralari kadastrda ro‘yxatdan o‘tkazilmasa, yuridik kuchga ega bo‘lmaydi.',
+    warningTip: '1 yildan oshiq muddatli ijaralar kadastrda ro‘yxatdan o‘tmasa, sudda haqiqiy sanalmaydi.',
     docs: [
       RequiredDocument(
         simpleName: 'Ijara shartnomasi',
         officialName: 'Notarial yoki elektron yozma ijara bitimi',
         whatIsIt: 'Ijara beruvchi va ijarachi o‘rtasidagi rasmiy shartnoma.',
-        insideContent: '• Ijara muddati, oylik to‘lov, maydoni va faoliyat maqsadi.',
-        whereToGet: 'Notarial idorada yoki soliq portali (ijara.soliq.uz) orqali rasmiylashtiriladi.',
+        insideContent: '• Ijara muddati, oylik to‘lov va faoliyat maqsadi.',
+        whereToGet: 'Notariusda yoki soliq tizimi orqali olinadi.',
       ),
     ],
     illegalDemands: ['Binoni qayta inventarizatsiyadan o‘tkazish'],
@@ -312,20 +312,20 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Yer uchastkasi ijara shartnomasini ro‘yxatdan o‘tkazish',
     titleOfficial: 'Yer uchastkasini uzoq muddatli ijaraga olish shartnomasini davlat ro‘yxatidan o‘tkazish',
     category: 'Yer uchastkasi',
-    purpose: 'Fermer, dehqon xo‘jaligi yoki tadbirkorlik yerlarini qonuniy o‘z nomingizga rasmiy mustahkamlash.',
+    purpose: 'Fermer yoki tadbirkorlik yerlarini qonuniy o‘z nomingizga rasmiy mustahkamlash.',
     duration: '2 ish kuni',
     cost: 'BHMning 1 baravari',
-    warningTip: 'Faqat E-auksion yoki "E-yer" ochiq elektron tanlovida yutib olingan yer uchastkalari ro‘yxatga olinadi.',
+    warningTip: 'Faqat E-auksion yoki "E-yer" ochiq elektron tanlovida yutib olingan yerlar ro‘yxatga olinadi.',
     docs: [
       RequiredDocument(
         simpleName: 'Elektron tanlov/auksion bayonnomasi',
         officialName: 'Yer uchastkasi ijara huquqini berish bo‘yicha auksion bayonnomasi',
         whatIsIt: 'Davlat ochiq tanlovida siz g‘olib bo‘lganingizni tasdiqlovchi QR-kodli hujjat.',
-        insideContent: '• Kontur raqami, yer maydoni (gektar) va ijara muddati (masalan: 30 yil).',
-        whereToGet: 'E-auksion.uz tizimidagi shaxsiy kabinetdan yuklab olinadi.',
+        insideContent: '• Kontur raqami, gektar maydoni va ijara muddati.',
+        whereToGet: 'E-auksion.uz tizimidan yuklab olinadi.',
       ),
     ],
-    illegalDemands: ['Tuman qishloq xo‘jaligi bo‘limidan qo‘shimcha rozilik xati'],
+    illegalDemands: ['Qishloq xo‘jaligi bo‘limidan qo‘shimcha rozilik xati'],
   ),
 
   // 11
@@ -334,17 +334,17 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Ipoteka va garov huquqini ro‘yxatga olish / yechish',
     titleOfficial: 'Ko‘chmas mulk ipotekasi va garov shartnomasini davlat ro‘yxatidan o‘tkazish',
     category: 'Davlat ro‘yxati',
-    purpose: 'Bankdan kredit olayotganda uyni garovga qo‘yish yoki kredit to‘langach uydan taqiqni yechish.',
+    purpose: 'Kredit olayotganda uyni garovga qo‘yish yoki kredit yopilgach taqiqni yechish.',
     duration: '1 ish kuni',
     cost: 'BHMning 50% miqdorida',
-    warningTip: 'Kredit yopilgach, bank xodimi tizim orqali taqiqni yechish arizasini darhol bepul yuborishi lozim.',
+    warningTip: 'Kredit yopilgach, bank xodimi tizim orqali taqiqni bepul yechib berishi shart.',
     docs: [
       RequiredDocument(
         simpleName: 'Ipoteka shartnomasi',
         officialName: 'Notarial tasdiqlangan ipoteka (garov) shartnomasi',
-        whatIsIt: 'Mulk qaysi bankka, qancha kredit evaziga garovga qo‘yilganini bildiruvchi rasmiy hujjat.',
+        whatIsIt: 'Mulk qaysi bankka, qancha kredit evaziga garovga qo‘yilganini bildiruvchi hujjat.',
         insideContent: '• Kredit summasi va garovga qo‘yilgan uyning kadastr raqami.',
-        whereToGet: 'Bank va notariusdan bir vaqtda beriladi.',
+        whereToGet: 'Bank va notariusdan beriladi.',
       ),
     ],
     illegalDemands: ['Bank vakilining DXMga shaxsan borishi'],
@@ -356,20 +356,20 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Servitut kelishuvi (Qo‘shni yeridan yo‘l ochish)',
     titleOfficial: 'Servitut huquqini davlat ro‘yxatidan o‘tkazish',
     category: 'Yer uchastkasi',
-    purpose: 'Uyingizga kirish uchun qo‘shnining hovlisidan o‘tish yoki quvur/sim tortish huquqini qonuniylashtirish.',
+    purpose: 'Uyingizga kirish uchun qo‘shnining hovlisidan o‘tish huquqini qonuniylashtirish.',
     duration: '2 ish kuni',
     cost: 'BHMning 0.5 baravari',
-    warningTip: 'Servitut rasmiylashtirilsa, qo‘shni o‘zgarganda ham sizning o‘tish huquqingiz o‘z kuchini yo‘qotmaydi.',
+    warningTip: 'Servitut rasmiylashtirilsa, qo‘shni o‘zgarsa ham sizning o‘tish huquqingiz yo‘qolmaydi.',
     docs: [
       RequiredDocument(
         simpleName: 'Servitut shartnomasi yoki sud qarori',
         officialName: 'Notarial tasdiqlangan servitut bitimi yoki sud ajrimi',
         whatIsIt: 'Qo‘shnilar yerning qaysi qismidan o‘tishga kelishgani xaritasi bilan.',
-        insideContent: '• Yo‘lning eni, uzunligi, koordinatalari va to‘lov miqdori (agar pulli bo‘lsa).',
-        whereToGet: 'Notariusda imzolanadi yoki fuqarolik sudidan olinadi.',
+        insideContent: '• Yo‘lning eni, uzunligi, koordinatalari va shartlari.',
+        whereToGet: 'Notariusda imzolanadi yoki suddan olinadi.',
       ),
     ],
-    illegalDemands: ['Qo‘shnining butun hovlisini qayta xatlovdan o‘tkazish'],
+    illegalDemands: ['Qo‘shnining butun hovlisini qayta o‘lchash'],
   ),
 
   // 13
@@ -378,7 +378,7 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Ko‘p yillik bog‘ va dov-daraxtlarga kadastr olish',
     titleOfficial: 'Ko‘p yillik dov-daraxtlarga kadastr pasportini shakllantirish',
     category: 'Kadastr pasporti',
-    purpose: 'Intensiv bog‘lar, mevali daraxtzorlar va uzumzorlarni ko‘chmas mulk sifatida hisobga olish.',
+    purpose: 'Intensiv bog‘lar va mevali daraxtzorlarni ko‘chmas mulk sifatida hisobga olish.',
     duration: '5 ish kuni',
     cost: 'Bog‘ maydoniga qarab',
     warningTip: 'Bog‘ barpo etilgan yerga bo‘lgan ijara yoki mulk huquqi bo‘lishi shart.',
@@ -400,10 +400,10 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Tadbirkorlik uchun yerni E-auksion orqali olish',
     titleOfficial: 'Yer uchastkalarini tadbirkorlik uchun elektron auksion orqali ajratish',
     category: 'Auksion',
-    purpose: 'Bo‘sh turgan davlat yerlarini savdo, xizmat ko‘rsatish yoki sex qurish uchun halol, ochiq auksionda yutib olish.',
+    purpose: 'Bo‘sh turgan davlat yerlarini savdo yoki ishlab chiqarish uchun halol, ochiq auksionda yutib olish.',
     duration: 'Auksion reglamenti bo‘yicha',
     cost: 'Auksionda shakllangan savdo bahosi',
-    warningTip: 'Hokimning yerni to‘g‘ridan-to‘g‘ri ajratish vakolati yo‘q! Birorta amaldorga "yer olib beraman" degan gapiga aldanib pul bermang!',
+    warningTip: 'Hokimning yerni to‘g‘ridan-to‘g‘ri ajratish vakolati yo‘q! Birorta amaldorga ishonib pul bermang!',
     docs: [
       RequiredDocument(
         simpleName: 'Elektron raqamli imzo (ERI)',
@@ -422,15 +422,15 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Qishloq xo‘jaligi yerlarini ijaraga olish tanlovi',
     titleOfficial: 'Qishloq xo‘jaligiga mo‘ljallangan yerlarni elektron ochiq tanlov orqali berish',
     category: 'Yer uchastkasi',
-    purpose: 'Ekin ekish, chorvachilik yoki issiqxona uchun yerlarni "E-yer" portali orqali ijaraga olish.',
+    purpose: 'Ekin ekish yoki issiqxona uchun yerlarni "E-yer" portali orqali ijaraga olish.',
     duration: 'Tanlov reglamenti asosida',
     cost: 'Tanlov shartlariga ko‘ra',
-    warningTip: 'G‘olib inson aralashuvisiz, kompyuter reytingi orqali ballar asosida shaffof aniqlanadi.',
+    warningTip: 'G‘olib inson aralashuvisiz, kompyuter reytingi orqali ballar asosida aniqlanadi.',
     docs: [
       RequiredDocument(
         simpleName: 'Fermerlik biznes-rejasi',
         officialName: 'Yer uchastkasidan samarali foydalanish taklifi',
-        whatIsIt: 'Yerda nima yetishtirmoqchisiz va qancha ish o‘rni yaratasiz, shular ko‘rsatilgan reja.',
+        whatIsIt: 'Yerda nima yetishtirishingiz va investitsiya hajmi ko‘rsatilgan reja.',
         insideContent: '• Ekin turlari, kiritiladigan investitsiya hajmi.',
         whereToGet: 'Ariza beruvchining o‘zi tayyorlaydi.',
       ),
@@ -488,7 +488,7 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Uy buzilishga (Snos) tushgan-tushmaganligini aniqlash',
     titleOfficial: 'Ko‘chmas mulkning bosh rejaga asosan buzilishga tushganligi haqida maʼlumotnoma',
     category: 'Maʼlumotnoma',
-    purpose: 'Shahar bosh rejasiga ko‘ra, uy o‘rnida kelajakda yo‘l yoki ko‘prik tushishi rejalashtirilganini tekshirish.',
+    purpose: 'Shahar bosh rejasiga ko‘ra, uy o‘rnida yo‘l yoki boshqa inshoot tushishi rejalashtirilganini tekshirish.',
     duration: '3 ish kuni',
     cost: 'BHMning 0.05 baravari',
     warningTip: 'Uy sotib olayotganda albatta bu maʼlumotnomani tekshiring!',
@@ -510,7 +510,7 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Mulk buzilganda kadastr hisobidan chiqarish',
     titleOfficial: 'Ko‘chmas mulkka bo‘lgan huquqning bekor qilinganligini davlat ro‘yxatidan o‘tkazish',
     category: 'Davlat ro‘yxati',
-    purpose: 'Eski uy buzilib o‘rniga yangi qurilayotganda yoki yo‘q bo‘lganda, eski uyni bazadan o‘chirish.',
+    purpose: 'Eski uy buzilib o‘rniga yangi qurilayotganda, eski uyni bazadan o‘chirish.',
     duration: '2 ish kuni',
     cost: 'BHMning 0.5 baravari',
     warningTip: 'Buzilgan uyni bazadan chiqarmasangiz, yo‘q uy uchun soliq hisoblanaveradi.',
@@ -541,11 +541,11 @@ final List<KadastrService> kadastrServices = [
         simpleName: 'Loyiha texnik topshirig‘i',
         officialName: 'Tashkilot buyurtmasi va loyihalash ruxsatnomasi',
         whatIsIt: 'Qaysi hududning xaritasi nima uchun kerakligini ko‘rsatuvchi rasmiy so‘rov.',
-        insideContent: '• Koordinatalar chegarasi va masshtabi (1:500, 1:2000).',
+        insideContent: '• Koordinatalar chegarasi va masshtabi.',
         whereToGet: 'Loyiha institutidan olinadi.',
       ),
     ],
-    illegalDemands: ['Litsenziyasiz vositachilar xizmatidan foydalanishga majburlash'],
+    illegalDemands: ['Litsenziyasiz shaxslar xizmatidan foydalanishga majburlash'],
   ),
 
   // 21
@@ -554,10 +554,10 @@ final List<KadastrService> kadastrServices = [
     titleSimple: 'Bino ostidagi yerni xususiylashtirish (Sotib olish)',
     titleOfficial: 'Qishloq xo‘jaligiga mo‘ljallanmagan yer uchastkalarini xususiylashtirish',
     category: 'Xususiylashtirish',
-    purpose: 'O‘zingizga qarashli xususiy bino yoki korxona turgan yerni bir umrlik shaxsiy xususiy mulk qilib sotib olish.',
+    purpose: 'O‘zingizga qarashli bino yoki korxona turgan yerni shaxsiy xususiy mulk qilib sotib olish.',
     duration: '10 ish kuni',
     cost: 'Yer solig‘ining karrali stavkasida',
-    warningTip: 'Xususiylashtirilgan yer — daxlsiz xususiy mulk. Uni hech kim asossiz tortib ololmaydi!',
+    warningTip: 'Xususiylashtirilgan yer — daxlsiz xususiy mulk bo‘ladi.',
     docs: [
       RequiredDocument(
         simpleName: 'Binoga bo‘lgan mulkchilik hujjati',
@@ -584,14 +584,14 @@ final List<KadastrService> kadastrServices = [
       RequiredDocument(
         simpleName: 'Uzoq yillik to‘lovlar va foydalanish dalillari',
         officialName: 'Yer va mol-mulk solig‘i cheklari, elektr, gaz, suv to‘lov daftarlari',
-        whatIsIt: 'Siz ushbu uyni kecha emas, ko‘p yillardan buyon egallab yashab kelayotganingizni tasdiqlovchi cheklar.',
+        whatIsIt: 'Siz ushbu uyni ko‘p yillardan buyon egallab yashab kelayotganingizni tasdiqlovchi cheklar.',
         insideContent: '• To‘lov qilingan sana va to‘lovchi F.I.Sh.',
-        whereToGet: 'Shaxsiy arxiv kvitansiyalari, bank yoki to‘lov tizimlari arxivlaridan.',
+        whereToGet: 'Shaxsiy arxiv kvitansiyalari yoki bank/to‘lov tizimlari arxivlaridan.',
       ),
       RequiredDocument(
         simpleName: 'Qurilish va arxitektura bo‘limi xulosasi',
         officialName: 'Bino shaharsozlik va xavfsizlik talablariga muvofiqligi to‘g‘risida komissiya xulosasi',
-        whatIsIt: 'Imorat magistral quvur, yuqori kuchlanishli elektr tarmog‘i yoki daryo muhofaza zonasida joylashmaganini tasdiqlovchi xulosa.',
+        whatIsIt: 'Imorat xavfli hududda (daryo muhofazasi, yuqori kuchlanish ostida) joylashmaganini tasdiqlovchi xulosa.',
         insideContent: '• Maxsus komissiya ko‘rigi bayonnomasi.',
         whereToGet: 'Xatlov jarayonida hududiy komissiya tomonidan bepul o‘rganiladi.',
       ),
@@ -637,14 +637,14 @@ final List<DocVocabulary> docVocabularies = [
   DocVocabulary(
     term: 'APZ (Arxitektura-rejalashtirish topshirig‘i) nima?',
     simpleExplanation: 'Uy yoki bino qurishdan oldin tuman arxitektura bo‘limi tomonidan beriladigan ruxsatnoma. Unda bino necha qavat bo‘lishi, qo‘shnining devoridan necha metr uzoqda qurilishi kerakligi yoziladi.',
-    whatIsInside: '• Qavatlar soni, qizil chiziq chegaralari;\n• Muhandislik tarmoqlariga (gaz, svet, suv) ulanish shartlari.',
-    whereToGet: 'my.gov.uz orqali yoki Davlat xizmatlari markazidan olinadi.',
+    whatIsInside: '• Qavatlar soni, qizil chiziq chegaralari;\n• Muhandislik tarmoqlariga ulanish shartlari.',
+    whereToFind: 'my.gov.uz orqali yoki Davlat xizmatlari markazidan olinadi.',
   ),
   DocVocabulary(
     term: 'Foydalanishga qabul qilish dalolatnomasi nima?',
     simpleExplanation: 'Bino yangi qurib bitkazilgach, Qurilish nazorati inspeksiyasi (GASN) kelib bino xavfsiz qurilganini tasdiqlovchi hujjat.',
     whatIsInside: '• Qurilish loyihasiga muvofiqlik bayonnomasi;\n• Yong‘in xavfsizligi va seysmik xulosalar.',
-    whereToGet: 'Qurilish va arxitektura nazorati inspeksiyasidan olinadi.',
+    whereToFind: 'Qurilish va arxitektura nazorati inspeksiyasidan olinadi.',
   ),
   DocVocabulary(
     term: 'Meros guvohnomasi nima?',
@@ -746,7 +746,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ListTile(
               leading: const Icon(Icons.support_agent, color: Colors.green),
               title: const Text('Kadastr agentligi Call-markazi'),
-              subtitle: const Text('Rasmiy ishonch telefoni: 1097'),
+              subtitle: const Text('Ishonch telefoni: 1097'),
               onTap: () {
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
