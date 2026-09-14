@@ -27,7 +27,7 @@ jobs:
         with:
           channel: 'stable'
 
-      - name: Android va Web karkasini sozlash
+      - name: Android va Web karkasini yaratish
         run: |
           flutter config --enable-web
           flutter create . --org uz.osonkadastr --platforms android,web --project-name oson_kadastr
@@ -38,15 +38,6 @@ jobs:
       - name: Logotipni sozlash
         run: dart run flutter_launcher_icons || true
 
-      - name: Web versiyani yig'ish
-        run: flutter build web --base-href "/Oson-Kadastr/" --release
-
-      - name: Web saytni GitHub Pages ga chiqarish
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./build/web
-
       - name: APK yig'ish
         run: flutter build apk --release
 
@@ -55,3 +46,12 @@ jobs:
         with:
           name: oson-kadastr-apk
           path: build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Web versiyani yig'ish
+        run: flutter build web --base-href "/Oson-Kadastr/" --release
+
+      - name: Web saytni GitHub Pages ga chiqarish
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/web
