@@ -2,7 +2,7 @@ name: Build APK and Web
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -13,45 +13,38 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Kodlarni yuklash
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Java muhitini o'rnatish
-        uses: actions/setup-java@v3
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      - name: Flutter o'rnatish
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
 
-      - name: Android va Web karkasini yaratish
-        run: |
-          flutter config --enable-web
-          flutter create . --org uz.osonkadastr --platforms android,web --project-name oson_kadastr
-
-      - name: Paketlarni yuklash
+      - name: Get dependencies
         run: flutter pub get
 
-      - name: Logotipni sozlash
-        run: dart run flutter_launcher_icons || true
-
-      - name: APK yig'ish
-        run: flutter build apk --release
-
-      - name: APK faylni yuklab olishga tayyorlash
-        uses: actions/upload-artifact@v4
-        with:
-          name: oson-kadastr-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-
-      - name: Web versiyani yig'ish
+      - name: Build Web
         run: flutter build web --base-href "/Oson-Kadastr/" --release
 
-      - name: Web saytni GitHub Pages ga chiqarish
-        uses: peaceiris/actions-gh-pages@v3
+      - name: Deploy Web to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: oson-kadastr-app
+          path: build/app/outputs/flutter-apk/app-release.apk
